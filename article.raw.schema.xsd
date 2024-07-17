@@ -1,0 +1,202 @@
+<?xml version="1.0" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <!-- BEGIN TYPE DEFINITIONS -->
+
+  <!-- BASE TYPES -->
+  <xs:simpleType name="schema_url_type">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="https://raw\.githubusercontent\.com/CondeNast/tny-archive-schemas/v1\.\d+\.\d+/article\.raw\.schema\.xsd"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="empty_type">
+    <xs:restriction base="xs:string">
+      <xs:length value="0"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="uuid_type">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="img_archive_id_type">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="\d{4}_\d{2}_\d{2}-\d{3}(-\d{3}-ad(-\d{2})?)?-image(-\d{2})?"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="img_archive_src_type">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="\d{4}_\d{2}_\d{2}-\d{3}(-\d{3}-ad(-\d{2})?)?-image(-\d{2})?.jpg"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="inline_text_type" mixed="true">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="em" type="inline_text_type"/>
+      <xs:element name="strong" type="inline_text_type"/>
+      <xs:element name="u" type="inline_text_type"/>
+      <xs:element name="sup" type="inline_text_type"/>
+      <xs:element name="sub" type="inline_text_type"/>
+      <xs:element name="br" type="empty_type"/>
+      <xs:element name="small" type="small_type"/>
+      <xs:element name="span" type="span_type"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <!-- small attributes -->
+
+  <xs:simpleType name="small_class_type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="lead-in"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- small -->
+
+  <xs:complexType name="small_type">
+    <xs:complexContent>
+      <xs:extension base="inline_text_type">
+        <xs:attribute name="class" type="small_class_type"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- img attributes -->
+
+  <xs:simpleType name="img_src_type">
+    <xs:restriction base="img_archive_src_type"/>
+  </xs:simpleType>
+
+  <!-- img -->
+
+  <xs:complexType name="img_type">
+    <xs:attribute name="src" type="img_src_type" use="required"/>
+  </xs:complexType>
+
+  <!-- figcaption -->
+
+  <xs:complexType name="figcaption_type">
+    <xs:complexContent>
+      <xs:extension base="inline_text_type"/>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- figure attributes -->
+
+  <xs:simpleType name="figure_class_type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="advertisement"/>
+      <xs:enumeration value="cartoon"/>
+      <xs:enumeration value="cover"/>
+      <xs:enumeration value="illustration"/>
+      <xs:enumeration value="other"/>
+      <xs:enumeration value="photograph"/>
+      <xs:enumeration value="spot"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="figure_id_type">
+    <xs:restriction base="img_archive_id_type"/>
+  </xs:simpleType>
+
+  <!-- figure -->
+
+  <xs:complexType name="figure_type">
+    <xs:sequence>
+      <xs:element name="img" type="img_type"/>
+      <xs:element name="figcaption" type="figcaption_type" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute name="class" type="figure_class_type" use="required"/>
+    <xs:attribute name="id" type="figure_id_type" use="required"/>
+  </xs:complexType>
+
+  <!-- span attributes -->
+
+  <xs:simpleType name="span_class_type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="text-block"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="span_id_type">
+    <xs:restriction base="uuid_type"/>
+  </xs:simpleType>
+
+  <!-- span -->
+
+  <xs:complexType name="span_type">
+    <xs:complexContent>
+      <xs:extension base="inline_text_type">
+        <xs:attribute name="class" type="span_class_type" use="required"/>
+        <xs:attribute name="id" type="span_id_type" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- p attributes -->
+
+  <xs:simpleType name="p_style_type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="text-align: center;"/>
+      <xs:enumeration value="text-align: right;"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="p_class_type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="rubric"/>
+      <xs:enumeration value="title"/>
+      <xs:enumeration value="subtitle"/>
+      <xs:enumeration value="byline"/>
+      <xs:enumeration value="note"/>
+      <xs:enumeration value="descender"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- p -->
+
+  <xs:complexType name="p_type">
+    <xs:complexContent>
+      <xs:extension base="inline_text_type">
+        <xs:attribute name="class" type="p_class_type"/>
+        <xs:attribute name="style" type="p_style_type"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- blockquote -->
+
+  <xs:complexType name="blockquote_type">
+    <xs:sequence minOccurs="1" maxOccurs="unbounded">
+      <xs:element name="p" type="p_type"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- article -->
+
+  <xs:complexType name="article_type">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="p" type="p_type"/>
+      <xs:element name="blockquote" type="blockquote_type"/>
+      <xs:element name="figure" type="figure_type"/>
+      <xs:element name="article" type="article_type"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <!-- END TYPE DEFINITIONS -->
+
+  <xs:element name="article">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="article_type">
+          <xs:attribute name="schema-url" type="schema_url_type" use="required"/>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>

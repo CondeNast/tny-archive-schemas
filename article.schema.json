@@ -1,0 +1,497 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/CondeNast/tny-archive-schemas/v1.0.0/article.schema.json",
+  "title": "Article",
+  "description": "A New Yorker article. This schema also validates ads which appeared in The New Yorker.",
+  "type": "object",
+  "required": [
+    "schemaUrl",
+    "archiveId",
+    "issueDate",
+    "pageStart",
+    "pageEnd",
+    "isAdvertisement",
+    "pages",
+    "raw",
+    "jsonld"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaUrl": {
+      "description": "The URL of the schema this document conforms to.",
+      "type": "string",
+      "pattern": "https://raw\\.githubusercontent\\.com/CondeNast/tny-archive-schemas/v1\\.\\d+\\.\\d+/article\\.schema\\.json"
+    },
+    "archiveId": {
+      "description": "The archive ID of the article.",
+      "$ref": "#/$defs/archiveId"
+    },
+    "copilotId": {
+      "description": "The copilot ID of the article.",
+      "$ref": "#/$defs/objectId"
+    },
+    "issueDate": {
+      "description": "The cover date of the issue this article is in.",
+      "type": "string",
+      "format": "date",
+      "examples": [
+        "1925-02-21"
+      ]
+    },
+    "pageStart": {
+      "$ref": "#/$defs/pageStart"
+    },
+    "pageEnd": {
+      "$ref": "#/$defs/pageEnd"
+    },
+    "isAdvertisement": {
+      "description": "Designates whether or not this article is an assignment. Must be `false` for editorial content.",
+      "type": "boolean"
+    },
+    "raw": {
+      "description": "The raw markup extracted from the article pages. Must validate against `raw.schema.xsd`.",
+      "type": "string"
+    },
+    "pages": {
+      "description": "A collection describing the text frames and images found on the article pages.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/page"
+      }
+    },
+    "jsonld": {
+      "description": "A schmea.org representation of the article.",
+      "$ref": "#/$defs/jsonldRoot"
+    }
+  },
+  "$defs": {
+    "archiveId": {
+      "type": "string",
+      "anyOf": [
+        {
+          "pattern": "^(19|20)\\d\\d_[01]\\d_[0123]\\d-(CV\\d|\\d{3})-image(-\\d{2})?(\\.jpg)?$"
+        },
+        {
+          "pattern": "^(19|20)\\d\\d_[01]\\d_[0123]\\d-(CV\\d|\\d{3})-(CV\\d|\\d{3})-ad(-\\d{2})?-image(-\\d{2})?(\\.jpg)?$"
+        },
+        {
+          "pattern": "^(19|20)\\d\\d_[01]\\d_[0123]\\d-(CV\\d|\\d{3})-(CV\\d|\\d{3})-[a-z_]+(-\\d{2})?$"
+        }
+      ],
+      "examples": [
+        "1969_06_07-002-004-goings_on_about_town",
+        "1969_06_07-027-028-the_talk_of_the_town",
+        "1969_06_07-045-111-profiles",
+        "1969_06_07-062-062-ad-02-image.jpg",
+        "1969_06_07-062-062-ad-02",
+        "1969_06_07-062-062-ad-03-image-01.jpg",
+        "1969_06_07-134-134-newsbreak-01",
+        "1969_06_07-134-134-newsbreak-02",
+        "1969_06_07-134-image-01.jpg",
+        "1969_06_07-134-image-02.jpg"
+      ]
+    },
+    "objectId": {
+      "description": "A MongoDB `ObjectId` identifier. See: https://www.mongodb.com/docs/manual/reference/method/ObjectId/ for more information.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{24}$"
+    },
+    "uuidv4": {
+      "description": "A V4 UUID.",
+      "type": "string",
+      "pattern": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+    },
+    "pageNumber": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 999
+        },
+        {
+          "type": "string",
+          "pattern": "^CV\\d$"
+        }
+      ]
+    },
+    "pageStart": {
+      "description": "The page on which the article starts.",
+      "$ref": "#/$defs/pageNumber"
+    },
+    "pageEnd": {
+      "description": "The page on which the article ends.",
+      "$ref": "#/$defs/pageNumber"
+    },
+    "boundingBox": {
+      "type": "object",
+      "required": [
+        "height",
+        "width",
+        "x",
+        "y"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "height": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "x": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "y": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "pageItem": {
+      "type": "object",
+      "required": [
+        "id",
+        "boundingBox"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The id of the page item. Should be an archive ID for images, and a UUID for text blocks.",
+          "type": "string",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/archiveId"
+            },
+            {
+              "$ref": "#/$defs/uuidv4"
+            }
+          ]
+        },
+        "boundingBox": {
+          "description": "The bouding box coordinates of the page item.",
+          "$ref": "#/$defs/boundingBox"
+        }
+      }
+    },
+    "page": {
+      "type": "object",
+      "required": [
+        "pageNumber",
+        "fileName",
+        "height",
+        "width",
+        "x",
+        "y"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "pageNumber": {
+          "$ref": "#/$defs/pageNumber"
+        },
+        "fileName": {
+          "description": "The original filename of the page.",
+          "type": "string",
+          "pattern": "^(19|20)\\d\\d_[01]\\d_[0123]\\d_\\d{3}_(CV\\d|\\d{3})__xx"
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "x": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "y": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "textBlocks": {
+          "description": "The text blocks on the page.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/pageItem"
+          }
+        },
+        "images": {
+          "description": "The images on the page.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/pageItem"
+          }
+        }
+      }
+    },
+    "jsonldRoot": {
+      "type": "object",
+      "required": [
+        "@context",
+        "pageStart",
+        "pageEnd",
+        "isPartOf"
+      ],
+      "allOf": [
+        {
+          "$ref": "#/$defs/jsonldBase"
+        }
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "@type": true,
+        "headline": true,
+        "articleSection": true,
+        "alternativeHeadline": true,
+        "articleBody": true,
+        "author": true,
+        "hasPart": true,
+        "itemReviewed": true,
+        "keywords": true,
+        "@context": {
+          "type": "string",
+          "pattern": "^https?://schema.org$"
+        },
+        "pageStart": {
+          "$ref": "#/$defs/pageStart"
+        },
+        "pageEnd": {
+          "$ref": "#/$defs/pageEnd"
+        },
+        "url": {
+          "description": "The URL of the article on newyorker.com.",
+          "type": "string",
+          "format": "uri"
+        },
+        "isPartOf": {
+          "description": "The issue this article appears in.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "@type",
+            "issueNumber",
+            "datePublished",
+            "isPartOf",
+            "url"
+          ],
+          "properties": {
+            "@type": {
+              "const": "PublicationIssue"
+            },
+            "issueNumber": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "datePublished": {
+              "description": "The publish date of the issue.",
+              "type": "string",
+              "format": "date"
+            },
+            "url": {
+              "description": "The URL of the issue on newyorker.com.",
+              "type": "string",
+              "format": "uri"
+            },
+            "isPartOf": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "properties": {
+                "@type": {
+                  "const": "PublicationVolume"
+                },
+                "volumeNumber": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          }
+        },
+        "image": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "@type",
+              "additionalType"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "@type": {
+                "const": "ImageObject"
+              },
+              "additionalType": {
+                "enum": [
+                  "Advertisement",
+                  "Cartoon",
+                  "Cover",
+                  "Illustration",
+                  "Other",
+                  "Photograph",
+                  "Spot"
+                ]
+              },
+              "contentUrl": {
+                "$ref": "#/$defs/archiveId"
+              },
+              "description": {
+                "description": "A description of the image (to be used as altText).",
+                "type": "string"
+              },
+              "caption": {
+                "description": "The caption that appeared with the image.",
+                "type": "string"
+              },
+              "creditText": {
+                "type": "string"
+              },
+              "contentSize": {
+                "type": "string"
+              },
+              "encodingFormat": {
+                "type": "string"
+              },
+              "keywords": {
+                "type": "array"
+              }
+            }
+          }
+        }
+      }
+    },
+    "jsonldBase": {
+      "type": "object",
+      "required": [
+        "@type"
+      ],
+      "properties": {
+        "@type": {
+          "description": "The schema.org type.",
+          "type": "array",
+          "anyOf": [
+            {
+              "const": [
+                "Article"
+              ]
+            },
+            {
+              "const": [
+                "Article",
+                "Review"
+              ]
+            }
+          ]
+        },
+        "headline": {
+          "description": "The main headline of the article. Also referred to as the `hed` or `printHed`.",
+          "type": "string"
+        },
+        "articleSection": {
+          "description": "The section or sections (rubrics) the article falls under.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "alternativeHeadline": {
+          "description": "The secondary headline of the article. Also referred to as the `dek` or `printDek`.",
+          "type": "string"
+        },
+        "articleBody": {
+          "description": "The main content of the article, in markup.",
+          "type": "string"
+        },
+        "author": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "@type": {
+                "const": "Person"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "hasPart": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "$ref": "#/$defs/jsonldBase"
+              },
+              {
+                "type": "object",
+                "description": "Supplemental text at the end of the article, perhaps following a signer. This may be an italicized note, such as a translation credit or additional context like “This is the first part of a two-part Profile.” In the “Goings on About Town” section, this would correspond to italicized details about schedules and locations following an event’s description.",
+                "required": [
+                  "@type",
+                  "additionalType",
+                  "text"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "@type": {
+                    "const": "CreativeWork"
+                  },
+                  "additionalType": {
+                    "const": "Note"
+                  },
+                  "text": {
+                    "type": "string"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "itemReviewed": {
+          "type": "array",
+          "description": "Things reviewed in the article, if applicable.",
+          "items": {
+            "type": "object",
+            "description": "The relevant schema.org type",
+            "required": "@type",
+            "properties": {
+              "@type": {
+                "type": "string",
+                "examples": [
+                  "Book",
+                  "Movie",
+                  "TheaterEvent",
+                  "MusicRecording",
+                  "TVSeason",
+                  "TVSeries",
+                  "ExhibitionEvent",
+                  "DanceEvent",
+                  "MusicEvent",
+                  "Restaurant",
+                  "ScreeningEvent",
+                  "SportsEvent",
+                  "LandmarksOrHistoricalBuildings",
+                  "ComedyEvent",
+                  "LiteraryEvent",
+                  "Event"
+                ]
+              }
+            }
+          }
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
