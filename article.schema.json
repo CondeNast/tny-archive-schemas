@@ -75,7 +75,7 @@
           "pattern": "^(19|20)\\d\\d_[01]\\d_[0123]\\d-(CV\\d|\\d{3})-(CV\\d|\\d{3})-ad(-\\d{2})?-image(-\\d{2})?(\\.jpg)?$"
         },
         {
-          "pattern": "^(19|20)\\d\\d_[01]\\d_[0123]\\d-(CV\\d|\\d{3})-(CV\\d|\\d{3})-[a-z_]+(-\\d{2})?$"
+          "pattern": "^(19|20)\\d\\d_[01]\\d_[0123]\\d-(CV\\d|\\d{3})-(CV\\d|\\d{3})-[a-z_]+(-\\d{2}|-root)?$"
         }
       ],
       "examples": [
@@ -282,6 +282,16 @@
             "@type": {
               "const": "PublicationIssue"
             },
+            "name": {
+              "type": "string",
+              "description": "The name of the issue, as printed on the cover, near the page numbers or on the table of contents.",
+              "examples": [
+                "June 7, 1969",
+                "June 27 & July 4, 1994",
+                "December 25, 2000 & January 1, 2001",
+                "August 19 & 26, 2002"
+              ]
+            },
             "issueNumber": {
               "type": "integer",
               "minimum": 1
@@ -431,7 +441,20 @@
               },
               {
                 "type": "object",
-                "description": "Supplemental text at the end of the article, perhaps following a signer. This may be an italicized note, such as a translation credit or additional context like “This is the first part of a two-part Profile.” In the “Goings on About Town” section, this would correspond to italicized details about schedules and locations following an event’s description.",
+                "description": "A referenced article (for root articles only).",
+                "additionalProperties": false,
+                "properties": {
+                  "@type": {
+                    "const": ["Article"]
+                  },
+                  "sameAs": {
+                    "$ref": "#/$defs/archiveId"
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "description": "Supplemental text, often at the start or end of the article, perhaps following a signer. This may be an italicized note, such as a translation credit or additional context like “This is the first part of a two-part Profile.” In the “Goings on About Town” section, this would correspond to italicized details about schedules and locations following an event’s description.",
                 "required": [
                   "@type",
                   "additionalType",
