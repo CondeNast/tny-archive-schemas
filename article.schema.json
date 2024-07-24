@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/CondeNast/tny-archive-schemas/v1.0.0/article.schema.json",
+  "$id": "https://raw.githubusercontent.com/CondeNast/tny-archive-schemas/v1.1.0/article.schema.json",
   "title": "Article",
   "description": "A New Yorker article. This schema also validates ads which appeared in The New Yorker.",
   "type": "object",
