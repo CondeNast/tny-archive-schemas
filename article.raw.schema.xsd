@@ -22,15 +22,21 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <xs:simpleType name="article_archive_id_type">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="\d{4}_\d{2}_\d{2}-(CV\d|\d{3})-(CV\d|\d{3})-[a-z_]+(-(\d{2}|root))?"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:simpleType name="img_archive_id_type">
     <xs:restriction base="xs:string">
-      <xs:pattern value="\d{4}_\d{2}_\d{2}-\d{3}(-\d{3}-ad(-\d{2})?)?-image(-\d{2})?"/>
+      <xs:pattern value="\d{4}_\d{2}_\d{2}-(CV\d|\d{3})(-(CV\d|\d{3})-ad(-\d{2})?)?-image(-\d{2})?"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="img_archive_src_type">
     <xs:restriction base="xs:string">
-      <xs:pattern value="\d{4}_\d{2}_\d{2}-\d{3}(-\d{3}-ad(-\d{2})?)?-image(-\d{2})?.jpg"/>
+      <xs:pattern value="\d{4}_\d{2}_\d{2}-(CV\d|\d{3})(-(CV\d|\d{3})-ad(-\d{2})?)?-image(-\d{2})?.jpg"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -154,6 +160,7 @@
       <xs:enumeration value="byline"/>
       <xs:enumeration value="note"/>
       <xs:enumeration value="descender"/>
+      <xs:enumeration value="chapter-heading"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -185,6 +192,7 @@
       <xs:element name="figure" type="figure_type"/>
       <xs:element name="article" type="article_type"/>
     </xs:choice>
+    <xs:attribute name="id" type="article_archive_id_type"/>
   </xs:complexType>
 
   <!-- END TYPE DEFINITIONS -->
