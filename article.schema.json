@@ -1,520 +1,1832 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/CondeNast/tny-archive-schemas/v1.1.0/article.schema.json",
-  "title": "Article",
-  "description": "A New Yorker article. This schema also validates ads which appeared in The New Yorker.",
-  "type": "object",
-  "required": [
-    "schemaUrl",
-    "archiveId",
-    "issueDate",
-    "pageStart",
-    "pageEnd",
-    "isAdvertisement",
-    "pages",
-    "raw",
-    "jsonld"
-  ],
-  "additionalProperties": false,
-  "properties": {
-    "schemaUrl": {
-      "description": "The URL of the schema this document conforms to.",
-      "type": "string",
-      "pattern": "https://raw\\.githubusercontent\\.com/CondeNast/tny-archive-schemas/v1\\.\\d+\\.\\d+/article\\.schema\\.json"
-    },
-    "archiveId": {
-      "description": "The archive ID of the article.",
-      "$ref": "#/$defs/archiveId"
-    },
-    "copilotId": {
-      "description": "The copilot ID of the article.",
-      "$ref": "#/$defs/objectId"
-    },
-    "issueDate": {
-      "description": "The cover date of the issue this article is in.",
-      "type": "string",
-      "format": "date",
-      "examples": [
-        "1925-02-21"
-      ]
-    },
-    "pageStart": {
-      "$ref": "#/$defs/pageStart"
-    },
-    "pageEnd": {
-      "$ref": "#/$defs/pageEnd"
-    },
-    "isAdvertisement": {
-      "description": "Designates whether or not this article is an assignment. Must be `false` for editorial content.",
-      "type": "boolean"
-    },
-    "raw": {
-      "description": "The raw markup extracted from the article pages. Must validate against `raw.schema.xsd`.",
-      "type": "string"
-    },
-    "pages": {
-      "description": "A collection describing the text frames and images found on the article pages.",
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/page"
-      }
-    },
-    "jsonld": {
-      "description": "A schmea.org representation of the article.",
-      "$ref": "#/$defs/jsonldRoot"
-    }
-  },
-  "$defs": {
-    "archiveId": {
-      "type": "string",
-      "anyOf": [
-        {
-          "pattern": "^(19|20)\\d\\d_[01]\\d_[0123]\\d-(CV\\d|\\d{3})-image(-\\d{2})?(\\.jpg)?$"
-        },
-        {
-          "pattern": "^(19|20)\\d\\d_[01]\\d_[0123]\\d-(CV\\d|\\d{3})-(CV\\d|\\d{3})-ad(-\\d{2})?-image(-\\d{2})?(\\.jpg)?$"
-        },
-        {
-          "pattern": "^(19|20)\\d\\d_[01]\\d_[0123]\\d-(CV\\d|\\d{3})-(CV\\d|\\d{3})-[a-z_]+(-\\d{2}|-root)?$"
-        }
-      ],
-      "examples": [
-        "1969_06_07-002-004-goings_on_about_town",
-        "1969_06_07-027-028-the_talk_of_the_town",
-        "1969_06_07-045-111-profiles",
-        "1969_06_07-062-062-ad-02-image.jpg",
-        "1969_06_07-062-062-ad-02",
-        "1969_06_07-062-062-ad-03-image-01.jpg",
-        "1969_06_07-134-134-newsbreak-01",
-        "1969_06_07-134-134-newsbreak-02",
-        "1969_06_07-134-image-01.jpg",
-        "1969_06_07-134-image-02.jpg"
-      ]
-    },
-    "objectId": {
-      "description": "A MongoDB `ObjectId` identifier. See: https://www.mongodb.com/docs/manual/reference/method/ObjectId/ for more information.",
-      "type": "string",
-      "pattern": "^[0-9a-f]{24}$"
-    },
-    "uuidv4": {
-      "description": "A V4 UUID.",
-      "type": "string",
-      "pattern": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
-    },
-    "pageNumber": {
-      "anyOf": [
-        {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 999
-        },
-        {
-          "type": "string",
-          "pattern": "^CV\\d$"
-        }
-      ]
-    },
-    "pageStart": {
-      "description": "The page on which the article starts.",
-      "$ref": "#/$defs/pageNumber"
-    },
-    "pageEnd": {
-      "description": "The page on which the article ends.",
-      "$ref": "#/$defs/pageNumber"
-    },
-    "boundingBox": {
-      "type": "object",
-      "required": [
-        "height",
-        "width",
-        "x",
-        "y"
-      ],
-      "additionalProperties": false,
-      "properties": {
-        "height": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "width": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "x": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "y": {
-          "type": "integer",
-          "minimum": 0
-        }
-      }
-    },
-    "pageItem": {
-      "type": "object",
-      "required": [
-        "id",
-        "boundingBox"
-      ],
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "description": "The id of the page item. Should be an archive ID for images, and a UUID for text blocks.",
-          "type": "string",
-          "anyOf": [
-            {
-              "$ref": "#/$defs/archiveId"
-            },
-            {
-              "$ref": "#/$defs/uuidv4"
-            }
-          ]
-        },
-        "boundingBox": {
-          "description": "The bouding box coordinates of the page item.",
-          "$ref": "#/$defs/boundingBox"
-        }
-      }
-    },
-    "page": {
-      "type": "object",
-      "required": [
-        "pageNumber",
-        "fileName",
-        "height",
-        "width",
-        "x",
-        "y"
-      ],
-      "additionalProperties": false,
-      "properties": {
-        "pageNumber": {
-          "$ref": "#/$defs/pageNumber"
-        },
-        "fileName": {
-          "description": "The original filename of the page.",
-          "type": "string",
-          "pattern": "^(19|20)\\d\\d_[01]\\d_[0123]\\d_\\d{3}_(CV\\d|\\d{3})__xx"
-        },
-        "height": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "width": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "x": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "y": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "textBlocks": {
-          "description": "The text blocks on the page.",
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/pageItem"
-          }
-        },
-        "images": {
-          "description": "The images on the page.",
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/pageItem"
-          }
-        }
-      }
-    },
-    "jsonldRoot": {
-      "type": "object",
-      "required": [
-        "@context",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/CondeNast/tny-archive-schemas/v1.2.0/article.schema.json",
+    "title": "Article",
+    "description": "A New Yorker article.",
+    "type": "object",
+    "required": [
+        "schemaUrl",
+        "archiveId",
+        "issueDate",
         "pageStart",
         "pageEnd",
-        "isPartOf"
-      ],
-      "allOf": [
-        {
-          "$ref": "#/$defs/jsonldBase"
-        }
-      ],
-      "additionalProperties": false,
-      "properties": {
-        "@type": true,
-        "headline": true,
-        "articleSection": true,
-        "alternativeHeadline": true,
-        "articleBody": true,
-        "author": true,
-        "hasPart": true,
-        "itemReviewed": true,
-        "keywords": true,
-        "@context": {
-          "type": "string",
-          "pattern": "^https?://schema.org$"
+        "isAdvertisement"
+    ],
+    "additionalProperties": false,
+    "properties": {
+        "schemaUrl": {
+            "description": "The URL of the schema this document conforms to.",
+            "$ref": "#/$defs/schemaUrl"
+        },
+        "archiveId": {
+            "description": "The archive ID of the article.",
+            "$ref": "#/$defs/archiveId"
+        },
+        "copilotId": {
+            "description": "The copilot ID of the article.",
+            "$ref": "#/$defs/copilotId"
+        },
+        "issueDate": {
+            "description": "The cover date of the issue this article is in.",
+            "type": "string",
+            "format": "date",
+            "examples": [
+                "1925-02-21"
+            ]
         },
         "pageStart": {
-          "$ref": "#/$defs/pageStart"
+            "description": "The page on which the article starts.",
+            "$ref": "#/$defs/pageNumber"
         },
         "pageEnd": {
-          "$ref": "#/$defs/pageEnd"
+            "description": "The page on which the article ends.",
+            "$ref": "#/$defs/pageNumber"
         },
-        "url": {
-          "description": "The URL of the article on newyorker.com.",
-          "type": "string",
-          "format": "uri"
+        "isAdvertisement": {
+            "description": "Designates whether or not this article is an assignment. Must be `false` for editorial content.",
+            "type": "boolean"
         },
-        "isPartOf": {
-          "description": "The issue this article appears in.",
-          "type": "object",
-          "additionalProperties": false,
-          "required": [
-            "@type",
-            "issueNumber",
-            "datePublished",
-            "isPartOf",
-            "url"
-          ],
-          "properties": {
-            "@type": {
-              "const": "PublicationIssue"
-            },
-            "name": {
-              "type": "string",
-              "description": "The name of the issue, as printed on the cover, near the page numbers or on the table of contents.",
-              "examples": [
-                "June 7, 1969",
-                "June 27 & July 4, 1994",
-                "December 25, 2000 & January 1, 2001",
-                "August 19 & 26, 2002"
-              ]
-            },
-            "issueNumber": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "datePublished": {
-              "description": "The publish date of the issue.",
-              "type": "string",
-              "format": "date"
-            },
-            "url": {
-              "description": "The URL of the issue on newyorker.com.",
-              "type": "string",
-              "format": "uri"
-            },
-            "isPartOf": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": [],
-              "properties": {
-                "@type": {
-                  "const": "PublicationVolume"
-                },
-                "volumeNumber": {
-                  "type": "integer",
-                  "minimum": 1
-                }
-              }
+        "pages": {
+            "description": "A collection describing the text frames and images found on the article pages.",
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/page"
             }
-          }
         },
-        "image": {
-          "type": "array",
-          "items": {
+        "raw": {
+            "description": "A collection describing the text frames and images found on the article pages.",
+            "type": "string"
+        },
+        "jsonld": {
+            "description": "A schmea.org representation of the article.",
+            "$ref": "#/$defs/jsonldRoot"
+        }
+    },
+    "$defs": {
+        "archiveId": {
+            "type": "string",
+            "anyOf": [
+                {
+                    "pattern": "^(19|20)\\d\\d_[01]\\d_[0123]\\d-(CV\\d|\\d{3})-image(-\\d{2})?(\\.jpg)?$"
+                },
+                {
+                    "pattern": "^(19|20)\\d\\d_[01]\\d_[0123]\\d-(CV\\d|\\d{3})-(CV\\d|\\d{3})-ad(-\\d{2})?-image(-\\d{2})?(\\.jpg)?$"
+                },
+                {
+                    "pattern": "^(19|20)\\d\\d_[01]\\d_[0123]\\d-(CV\\d|\\d{3})-(CV\\d|\\d{3})-[a-z_]+(-\\d{2}|-root)?$"
+                }
+            ]
+        },
+        "objectId": {
+            "description": "A MongoDB `ObjectId` identifier. See: https://www.mongodb.com/docs/manual/reference/method/ObjectId/ for more information.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{24}$"
+        },
+        "copilotId": {
+            "$ref": "#/$defs/objectId"
+        },
+        "issueDate": {
+            "type": "string",
+            "format": "date"
+        },
+        "schemaUrl": {
+            "type": "string",
+            "pattern": "https://raw\\.githubusercontent\\.com/CondeNast/tny-archive-schemas/v1\\.\\d+\\.\\d+/article\\.schema\\.json"
+        },
+        "pageNumber": {
+            "anyOf": [
+                {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 999
+                },
+                {
+                    "type": "string",
+                    "pattern": "^CV\\d$"
+                }
+            ]
+        },
+        "boundingBox": {
             "type": "object",
             "required": [
-              "@type",
-              "additionalType"
+                "height",
+                "width",
+                "x",
+                "y"
             ],
             "additionalProperties": false,
             "properties": {
-              "@type": {
-                "const": "ImageObject"
-              },
-              "additionalType": {
-                "enum": [
-                  "Advertisement",
-                  "Cartoon",
-                  "Cover",
-                  "Illustration",
-                  "Other",
-                  "Photograph",
-                  "Spot"
-                ]
-              },
-              "contentUrl": {
-                "$ref": "#/$defs/archiveId"
-              },
-              "description": {
-                "description": "A description of the image (to be used as altText).",
-                "type": "string"
-              },
-              "caption": {
-                "description": "The caption that appeared with the image.",
-                "type": "string"
-              },
-              "creditText": {
-                "type": "string"
-              },
-              "contentSize": {
-                "type": "string"
-              },
-              "encodingFormat": {
-                "type": "string"
-              },
-              "keywords": {
-                "type": "array"
-              }
-            }
-          }
-        }
-      }
-    },
-    "jsonldBase": {
-      "type": "object",
-      "required": [
-        "@type"
-      ],
-      "properties": {
-        "@type": {
-          "description": "The schema.org type.",
-          "type": "array",
-          "anyOf": [
-            {
-              "const": [
-                "Article"
-              ]
-            },
-            {
-              "const": [
-                "Article",
-                "Review"
-              ]
-            }
-          ]
-        },
-        "headline": {
-          "description": "The main headline of the article. Also referred to as the `hed` or `printHed`.",
-          "type": "string"
-        },
-        "articleSection": {
-          "description": "The section or sections (rubrics) the article falls under.",
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "alternativeHeadline": {
-          "description": "The secondary headline of the article. Also referred to as the `dek` or `printDek`.",
-          "type": "string"
-        },
-        "articleBody": {
-          "description": "The main content of the article, in markup.",
-          "type": "string"
-        },
-        "author": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "@type": {
-                "const": "Person"
-              },
-              "name": {
-                "type": "string"
-              }
-            }
-          }
-        },
-        "hasPart": {
-          "type": "array",
-          "items": {
-            "anyOf": [
-              {
-                "type": "object",
-                "additionalProperties": false,
-                "$ref": "#/$defs/jsonldBase"
-              },
-              {
-                "type": "object",
-                "description": "A referenced article (for root articles only).",
-                "additionalProperties": false,
-                "properties": {
-                  "@type": {
-                    "const": ["Article"]
-                  },
-                  "sameAs": {
-                    "$ref": "#/$defs/archiveId"
-                  }
+                "height": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "width": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "x": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "y": {
+                    "type": "integer",
+                    "minimum": 0
                 }
-              },
-              {
-                "type": "object",
-                "description": "Supplemental text, often at the start or end of the article, perhaps following a signer. This may be an italicized note, such as a translation credit or additional context like “This is the first part of a two-part Profile.” In the “Goings on About Town” section, this would correspond to italicized details about schedules and locations following an event’s description.",
-                "required": [
-                  "@type",
-                  "additionalType",
-                  "text"
-                ],
-                "additionalProperties": false,
-                "properties": {
-                  "@type": {
-                    "const": "CreativeWork"
-                  },
-                  "additionalType": {
-                    "const": "Note"
-                  },
-                  "text": {
+            }
+        },
+        "uuidv4": {
+            "description": "A V4 UUID.",
+            "type": "string",
+            "pattern": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+        },
+        "pageItem": {
+            "type": "object",
+            "required": [
+                "id",
+                "boundingBox"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "id": {
+                    "description": "The id of the page item. Should be an archive ID for images, and a UUID for text blocks.",
+                    "type": "string",
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/archiveId"
+                        },
+                        {
+                            "$ref": "#/$defs/uuidv4"
+                        }
+                    ]
+                },
+                "boundingBox": {
+                    "description": "The bouding box coordinates of the page item.",
+                    "$ref": "#/$defs/boundingBox"
+                }
+            }
+        },
+        "page": {
+            "type": "object",
+            "required": [
+                "pageNumber",
+                "fileName",
+                "height",
+                "width",
+                "x",
+                "y"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "pageNumber": {
+                    "$ref": "#/$defs/pageNumber"
+                },
+                "fileName": {
+                    "description": "The original filename of the page.",
+                    "type": "string",
+                    "pattern": "^(19|20)\\d\\d_[01]\\d_[0123]\\d_\\d{3}_(CV\\d|\\d{3})__xx"
+                },
+                "height": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "width": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "x": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "y": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "textBlocks": {
+                    "description": "The text blocks on the page.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/pageItem"
+                    }
+                },
+                "images": {
+                    "description": "The images on the page.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/pageItem"
+                    }
+                }
+            }
+        },
+        "pageStart": {
+            "description": "The page on which the article starts.",
+            "$ref": "#/$defs/pageNumber"
+        },
+        "pageEnd": {
+            "description": "The page on which the article ends.",
+            "$ref": "#/$defs/pageNumber"
+        },
+        "Place": {
+            "type": "object",
+            "required": [
+                "@type",
+                "name"
+            ],
+            "properties": {
+                "@type": {
                     "type": "string"
-                  }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "address": {
+                    "type": "string"
+                },
+                "telephone": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
                 }
-              }
-            ]
-          }
-        },
-        "itemReviewed": {
-          "type": "array",
-          "description": "Things reviewed in the article, if applicable.",
-          "items": {
-            "type": "object",
-            "description": "The relevant schema.org type",
-            "required": "@type",
-            "properties": {
-              "@type": {
-                "type": "string",
-                "examples": [
-                  "Book",
-                  "Movie",
-                  "TheaterEvent",
-                  "MusicRecording",
-                  "TVSeason",
-                  "TVSeries",
-                  "ExhibitionEvent",
-                  "DanceEvent",
-                  "MusicEvent",
-                  "Restaurant",
-                  "ScreeningEvent",
-                  "SportsEvent",
-                  "LandmarksOrHistoricalBuildings",
-                  "ComedyEvent",
-                  "LiteraryEvent",
-                  "Event"
-                ]
-              }
             }
-          }
         },
-        "keywords": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+        "Schedule": {
+            "type": "object",
+            "required": [
+                "@type",
+                "description"
+            ],
+            "properties": {
+                "@type": {
+                    "const": "Schedule"
+                },
+                "description": {
+                    "type": "string"
+                }
+            }
+        },
+        "Event": {
+            "type": "object",
+            "required": [
+                "@type"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "location": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "$ref": "#/$defs/Place"
+                    }
+                },
+                "eventSchedule": {
+                    "type": "object",
+                    "$ref": "#/$defs/Schedule"
+                }
+            }
+        },
+        "Person": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type",
+                "name"
+            ],
+            "properties": {
+                "@type": {
+                    "const": "Person"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "Organization": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type",
+                "name"
+            ],
+            "properties": {
+                "@type": {
+                    "const": "Organization"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "Museum": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type",
+                "name"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/$defs/Place"
+                }
+            ],
+            "properties": {
+                "name": true,
+                "address": true,
+                "telephone": true,
+                "url": true,
+                "@type": {
+                    "const": "Museum"
+                },
+                "event": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/ExhibitionEvent"
+                    }
+                }
+            }
+        },
+        "ExhibitionEvent": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/$defs/Event"
+                }
+            ],
+            "properties": {
+                "name": true,
+                "eventSchedule": true,
+                "@type": {
+                    "const": "ExhibitionEvent"
+                },
+                "about": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/Person"
+                            },
+                            {
+                                "$ref": "#/$defs/Organization"
+                            }
+                        ]
+                    }
+                },
+                "location": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/ArtGallery"
+                            },
+                            {
+                                "$ref": "#/$defs/Museum"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "ArtGallery": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type",
+                "name"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/$defs/Place"
+                }
+            ],
+            "properties": {
+                "name": true,
+                "address": true,
+                "telephone": true,
+                "url": true,
+                "@type": {
+                    "const": "ArtGallery"
+                },
+                "event": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/ExhibitionEvent"
+                    }
+                }
+            }
+        },
+        "MusicGroup": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type",
+                "name"
+            ],
+            "properties": {
+                "@type": {
+                    "const": "MusicGroup"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "MusicVenue": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type",
+                "name"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/$defs/Place"
+                }
+            ],
+            "properties": {
+                "name": true,
+                "address": true,
+                "telephone": true,
+                "url": true,
+                "@type": {
+                    "const": "MusicVenue"
+                },
+                "event": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/MusicEvent"
+                    }
+                }
+            }
+        },
+        "MusicEvent": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/$defs/Event"
+                }
+            ],
+            "properties": {
+                "name": true,
+                "eventSchedule": true,
+                "@type": {
+                    "const": "MusicEvent"
+                },
+                "location": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/MusicVenue"
+                    }
+                },
+                "performer": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/Person"
+                            },
+                            {
+                                "$ref": "#/$defs/MusicGroup"
+                            }
+                        ]
+                    }
+                },
+                "workPerformed": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/MusicComposition"
+                    }
+                }
+            }
+        },
+        "BarOrPub": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type",
+                "name"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/$defs/Place"
+                }
+            ],
+            "properties": {
+                "name": true,
+                "address": true,
+                "telephone": true,
+                "url": true,
+                "@type": {
+                    "const": "BarOrPub"
+                },
+                "event": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/MusicEvent"
+                    }
+                }
+            }
+        },
+        "Book": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type",
+                "name"
+            ],
+            "properties": {
+                "@type": {
+                    "const": "Book"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "author": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/Person"
+                            },
+                            {
+                                "$ref": "#/$defs/Organization"
+                            }
+                        ]
+                    }
+                },
+                "publisher": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/Person"
+                            },
+                            {
+                                "$ref": "#/$defs/Organization"
+                            }
+                        ]
+                    }
+                },
+                "translator": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/Person"
+                            },
+                            {
+                                "$ref": "#/$defs/Organization"
+                            }
+                        ]
+                    }
+                },
+                "isbn": {
+                    "type": "string",
+                    "pattern": "^(97[89])?\\d{9}[0-9X]$"
+                },
+                "sameAs": {
+                    "type": "string",
+                    "description": "worldcat url",
+                    "examples": [
+                        "https://www.worldcat.org/oclc/218682"
+                    ]
+                }
+            }
+        },
+        "PerformingGroup": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type",
+                "name"
+            ],
+            "properties": {
+                "@type": {
+                    "const": "PerformingGroup"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "Play": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type",
+                "name"
+            ],
+            "properties": {
+                "@type": {
+                    "const": "Play"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "author": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/Person"
+                            },
+                            {
+                                "$ref": "#/$defs/Organization"
+                            }
+                        ]
+                    }
+                },
+                "translator": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/Person"
+                            },
+                            {
+                                "$ref": "#/$defs/Organization"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "TheaterEvent": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/$defs/Event"
+                }
+            ],
+            "properties": {
+                "name": true,
+                "eventSchedule": true,
+                "@type": {
+                    "const": "TheaterEvent"
+                },
+                "location": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/PerformingArtsTheater"
+                    }
+                },
+                "actor": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/Person"
+                            },
+                            {
+                                "$ref": "#/$defs/PerformingGroup"
+                            }
+                        ]
+                    }
+                },
+                "director": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/Person"
+                    }
+                },
+                "workPerformed": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/Play"
+                    }
+                },
+                "sameAs": {
+                    "type": "string",
+                    "description": "IBDB or IOBDB url",
+                    "examples": [
+                        "http://www.iobdb.com/Production/3307",
+                        "https://www.ibdb.com/broadway-production/the-front-page-3298"
+                    ]
+                }
+            }
+        },
+        "PerformingArtsTheater": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type",
+                "name"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/$defs/Place"
+                }
+            ],
+            "properties": {
+                "name": true,
+                "address": true,
+                "telephone": true,
+                "url": true,
+                "@type": {
+                    "const": "PerformingArtsTheater"
+                },
+                "event": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/TheaterEvent"
+                    }
+                }
+            }
+        },
+        "ComedyEvent": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/$defs/Event"
+                }
+            ],
+            "properties": {
+                "name": true,
+                "eventSchedule": true,
+                "@type": {
+                    "const": "ComedyEvent"
+                },
+                "location": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/PerformingArtsTheater"
+                    }
+                },
+                "performer": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/Person"
+                            },
+                            {
+                                "$ref": "#/$defs/Organization"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "CreativeWork": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type",
+                "name"
+            ],
+            "properties": {
+                "@type": {
+                    "const": "CreativeWork"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "creator": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/Person"
+                            },
+                            {
+                                "$ref": "#/$defs/Organization"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "DanceGroup": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type",
+                "name"
+            ],
+            "properties": {
+                "@type": {
+                    "const": "DanceGroup"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "DanceEvent": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/$defs/Event"
+                }
+            ],
+            "properties": {
+                "name": true,
+                "eventSchedule": true,
+                "@type": {
+                    "const": "DanceEvent"
+                },
+                "location": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/PerformingArtsTheater"
+                    }
+                },
+                "performer": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/Person"
+                            },
+                            {
+                                "$ref": "#/$defs/DanceGroup"
+                            }
+                        ]
+                    }
+                },
+                "workPerformed": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/CreativeWork"
+                    }
+                }
+            }
+        },
+        "LandmarksOrHistoricalBuildings": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type",
+                "name"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/$defs/Place"
+                }
+            ],
+            "properties": {
+                "name": true,
+                "address": true,
+                "telephone": true,
+                "url": true,
+                "@type": {
+                    "const": "LandmarksOrHistoricalBuildings"
+                },
+                "creator": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/Person"
+                            },
+                            {
+                                "$ref": "#/$defs/Organization"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "Movie": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type",
+                "name"
+            ],
+            "properties": {
+                "@type": {
+                    "const": "Movie"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "director": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "$ref": "#/$defs/Person"
+                    }
+                },
+                "productionCompany": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "$ref": "#/$defs/Organization"
+                    }
+                },
+                "inLanguage": {
+                    "type": "string"
+                },
+                "subtitleLanguage": {
+                    "type": "string"
+                },
+                "copyrightYear": {
+                    "type": "number"
+                },
+                "actor": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/Person"
+                            },
+                            {
+                                "$ref": "#/$defs/Organization"
+                            }
+                        ]
+                    }
+                },
+                "musicBy": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/Person"
+                            },
+                            {
+                                "$ref": "#/$defs/Organization"
+                            }
+                        ]
+                    }
+                },
+                "sameAs": {
+                    "type": "string",
+                    "description": "imdb url",
+                    "examples": [
+                        "https://www.imdb.com/title/tt0075612"
+                    ]
+                }
+            }
+        },
+        "MusicRelease": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type",
+                "recordLabel"
+            ],
+            "properties": {
+                "@type": {
+                    "const": "MusicRelease"
+                },
+                "recordLabel": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/Organization"
+                    }
+                },
+                "releaseOf": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/MusicAlbum"
+                            },
+                            {
+                                "$ref": "#/$defs/MusicRecording"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "MusicRecording": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type",
+                "name"
+            ],
+            "properties": {
+                "@type": {
+                    "const": "MusicRecording"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "byArtist": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/Person"
+                            },
+                            {
+                                "$ref": "#/$defs/MusicGroup"
+                            }
+                        ]
+                    }
+                },
+                "inAlbum": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/MusicAlbum"
+                    }
+                },
+                "release": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/MusicRelease"
+                    }
+                }
+            }
+        },
+        "MusicAlbum": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type",
+                "name"
+            ],
+            "properties": {
+                "@type": {
+                    "const": "MusicAlbum"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "albumRelease": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/MusicRelease"
+                    }
+                },
+                "byArtist": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/Person"
+                            },
+                            {
+                                "$ref": "#/$defs/MusicGroup"
+                            }
+                        ]
+                    }
+                },
+                "track": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/MusicRecording"
+                    }
+                }
+            }
+        },
+        "NightClub": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type",
+                "name"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/$defs/Place"
+                }
+            ],
+            "properties": {
+                "name": true,
+                "address": true,
+                "telephone": true,
+                "url": true,
+                "@type": {
+                    "const": "NightClub"
+                },
+                "event": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/MusicEvent"
+                    }
+                }
+            }
+        },
+        "Restaurant": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type",
+                "name"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/$defs/Place"
+                }
+            ],
+            "properties": {
+                "name": true,
+                "address": true,
+                "telephone": true,
+                "url": true,
+                "@type": {
+                    "const": "Restaurant"
+                },
+                "event": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/MusicEvent"
+                    }
+                }
+            }
+        },
+        "MovieTheater": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type",
+                "name"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/$defs/Place"
+                }
+            ],
+            "properties": {
+                "name": true,
+                "address": true,
+                "telephone": true,
+                "url": true,
+                "@type": {
+                    "const": "MovieTheater"
+                },
+                "event": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/ScreeningEvent"
+                    }
+                }
+            }
+        },
+        "ScreeningEvent": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/$defs/Event"
+                }
+            ],
+            "properties": {
+                "name": true,
+                "eventSchedule": true,
+                "@type": {
+                    "const": "ScreeningEvent"
+                },
+                "location": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/MovieTheater"
+                    }
+                },
+                "workPresented": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/Movie"
+                    }
+                }
+            }
+        },
+        "SportsEvent": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/$defs/Event"
+                }
+            ],
+            "properties": {
+                "name": true,
+                "eventSchedule": true,
+                "@type": {
+                    "const": "SportsEvent"
+                },
+                "sport": {
+                    "type": "text"
+                },
+                "location": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/Place"
+                    }
+                },
+                "competitor": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/Person"
+                            },
+                            {
+                                "$ref": "#/$defs/Organization"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "Episode": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type"
+            ],
+            "properties": {
+                "@type": {
+                    "const": "Episode"
+                },
+                "episodeNumber": "number",
+                "name": {
+                    "type": "string"
+                },
+                "director": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "$ref": "#/$defs/Person"
+                    }
+                },
+                "productionCompany": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "$ref": "#/$defs/Organization"
+                    }
+                },
+                "inLanguage": {
+                    "type": "string"
+                },
+                "subtitleLanguage": {
+                    "type": "string"
+                },
+                "copyrightYear": {
+                    "type": "number"
+                },
+                "actor": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/Person"
+                            },
+                            {
+                                "$ref": "#/$defs/Organization"
+                            }
+                        ]
+                    }
+                },
+                "musicBy": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/Person"
+                            },
+                            {
+                                "$ref": "#/$defs/Organization"
+                            }
+                        ]
+                    }
+                },
+                "sameAs": {
+                    "type": "string",
+                    "description": "imdb url",
+                    "examples": [
+                        "https://www.imdb.com/title/tt0075612"
+                    ]
+                },
+                "partOfSeason": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/TVSeason"
+                    }
+                }
+            }
+        },
+        "TVSeries": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type",
+                "name"
+            ],
+            "properties": {
+                "@type": {
+                    "const": "TVSeries"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "creator": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "$ref": "#/$defs/Person"
+                    }
+                },
+                "productionCompany": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "$ref": "#/$defs/Organization"
+                    }
+                },
+                "inLanguage": {
+                    "type": "string"
+                },
+                "subtitleLanguage": {
+                    "type": "string"
+                },
+                "copyrightYear": {
+                    "type": "number"
+                },
+                "actor": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/Person"
+                            },
+                            {
+                                "$ref": "#/$defs/Organization"
+                            }
+                        ]
+                    }
+                },
+                "musicBy": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/Person"
+                            },
+                            {
+                                "$ref": "#/$defs/Organization"
+                            }
+                        ]
+                    }
+                },
+                "sameAs": {
+                    "type": "string",
+                    "description": "imdb url",
+                    "examples": [
+                        "https://www.imdb.com/title/tt0075612"
+                    ]
+                },
+                "containsSeason": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/TVSeason"
+                    }
+                }
+            }
+        },
+        "TVSeason": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "@type",
+                "seasonNumber"
+            ],
+            "properties": {
+                "@type": {
+                    "const": "TVSeason"
+                },
+                "seasonNumber": {
+                    "type": "number"
+                },
+                "productionCompany": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "$ref": "#/$defs/Organization"
+                    }
+                },
+                "inLanguage": {
+                    "type": "string"
+                },
+                "subtitleLanguage": {
+                    "type": "string"
+                },
+                "copyrightYear": {
+                    "type": "number"
+                },
+                "actor": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/Person"
+                            },
+                            {
+                                "$ref": "#/$defs/Organization"
+                            }
+                        ]
+                    }
+                },
+                "musicBy": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/Person"
+                            },
+                            {
+                                "$ref": "#/$defs/Organization"
+                            }
+                        ]
+                    }
+                },
+                "sameAs": {
+                    "type": "string",
+                    "description": "imdb url",
+                    "examples": [
+                        "https://www.imdb.com/title/tt0075612"
+                    ]
+                },
+                "partOfSeries": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/TVSeries"
+                    }
+                },
+                "episode": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/Episode"
+                    }
+                }
+            }
+        },
+        "jsonldBase": {
+            "type": "object",
+            "required": [
+                "@type"
+            ],
+            "properties": {
+                "@type": {
+                    "description": "The schema.org type.",
+                    "type": "array",
+                    "anyOf": [
+                        {
+                            "const": [
+                                "Article"
+                            ]
+                        },
+                        {
+                            "const": [
+                                "Article",
+                                "Review"
+                            ]
+                        }
+                    ]
+                },
+                "headline": {
+                    "description": "The main headline of the article. Also referred to as the `hed` or `printHed`.",
+                    "type": "string"
+                },
+                "articleSection": {
+                    "description": "The section or sections (rubrics) the article falls under.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "alternativeHeadline": {
+                    "description": "The secondary headline of the article. Also referred to as the `dek` or `printDek`.",
+                    "type": "string"
+                },
+                "articleBody": {
+                    "description": "The main content of the article, in markup.",
+                    "type": "string"
+                },
+                "author": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "@type": {
+                                "const": "Person"
+                            },
+                            "name": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "hasPart": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "$ref": "#/$defs/jsonldBase"
+                            },
+                            {
+                                "type": "object",
+                                "description": "A referenced article (for root articles only).",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "@type": {
+                                        "const": [
+                                            "Article"
+                                        ]
+                                    },
+                                    "sameAs": {
+                                        "$ref": "#/$defs/archiveId"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "description": "Supplemental text, often at the start or end of the article, perhaps following a signer. This may be an italicized note, such as a translation credit or additional context like “This is the first part of a two-part Profile.” In the “Goings on About Town” section, this would correspond to italicized details about schedules and locations following an event’s description.",
+                                "required": [
+                                    "@type",
+                                    "additionalType",
+                                    "text"
+                                ],
+                                "additionalProperties": false,
+                                "properties": {
+                                    "@type": {
+                                        "const": "CreativeWork"
+                                    },
+                                    "additionalType": {
+                                        "const": "Note"
+                                    },
+                                    "text": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                "itemReviewed": {
+                    "type": "array",
+                    "description": "Things reviewed in the article, if applicable.",
+                    "items": {
+                        "type": "object",
+                        "description": "The relevant schema.org type",
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/ArtGallery"
+                            },
+                            {
+                                "$ref": "#/$defs/BarOrPub"
+                            },
+                            {
+                                "$ref": "#/$defs/Book"
+                            },
+                            {
+                                "$ref": "#/$defs/ComedyEvent"
+                            },
+                            {
+                                "$ref": "#/$defs/DanceEvent"
+                            },
+                            {
+                                "$ref": "#/$defs/ExhibitionEvent"
+                            },
+                            {
+                                "$ref": "#/$defs/Event"
+                            },
+                            {
+                                "$ref": "#/$defs/LandmarksOrHistoricalBuildings"
+                            },
+                            {
+                                "$ref": "#/$defs/Movie"
+                            },
+                            {
+                                "$ref": "#/$defs/MusicAlbum"
+                            },
+                            {
+                                "$ref": "#/$defs/MusicEvent"
+                            },
+                            {
+                                "$ref": "#/$defs/MusicRecording"
+                            },
+                            {
+                                "$ref": "#/$defs/MusicRelease"
+                            },
+                            {
+                                "$ref": "#/$defs/MusicVenue"
+                            },
+                            {
+                                "$ref": "#/$defs/NightClub"
+                            },
+                            {
+                                "$ref": "#/$defs/Restaurant"
+                            },
+                            {
+                                "$ref": "#/$defs/ScreeningEvent"
+                            },
+                            {
+                                "$ref": "#/$defs/SportsEvent"
+                            },
+                            {
+                                "$ref": "#/$defs/TheaterEvent"
+                            },
+                            {
+                                "$ref": "#/$defs/TVSeason"
+                            },
+                            {
+                                "$ref": "#/$defs/TVSeries"
+                            }
+                        ]
+                    }
+                },
+                "keywords": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "jsonldRoot": {
+            "type": "object",
+            "required": [
+                "@context",
+                "pageStart",
+                "pageEnd",
+                "isPartOf"
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/$defs/jsonldBase"
+                }
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "@type": true,
+                "headline": true,
+                "articleSection": true,
+                "alternativeHeadline": true,
+                "articleBody": true,
+                "author": true,
+                "hasPart": true,
+                "itemReviewed": true,
+                "keywords": true,
+                "@context": {
+                    "type": "string",
+                    "pattern": "^https?://schema.org$"
+                },
+                "pageStart": {
+                    "$ref": "#/$defs/pageStart"
+                },
+                "pageEnd": {
+                    "$ref": "#/$defs/pageEnd"
+                },
+                "url": {
+                    "description": "The URL of the article on newyorker.com.",
+                    "type": "string",
+                    "format": "uri"
+                },
+                "isPartOf": {
+                    "description": "The issue this article appears in.",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "@type",
+                        "issueNumber",
+                        "datePublished",
+                        "isPartOf",
+                        "url"
+                    ],
+                    "properties": {
+                        "@type": {
+                            "const": "PublicationIssue"
+                        },
+                        "name": {
+                            "type": "string",
+                            "description": "The name of the issue, as printed on the cover, near the page numbers or on the table of contents.",
+                            "examples": [
+                                "June 7, 1969",
+                                "June 27 & July 4, 1994",
+                                "December 25, 2000 & January 1, 2001",
+                                "August 19 & 26, 2002"
+                            ]
+                        },
+                        "issueNumber": {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "datePublished": {
+                            "description": "The publish date of the issue.",
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "url": {
+                            "description": "The URL of the issue on newyorker.com.",
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        "isPartOf": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [],
+                            "properties": {
+                                "@type": {
+                                    "const": "PublicationVolume"
+                                },
+                                "volumeNumber": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                }
+                            }
+                        }
+                    }
+                },
+                "image": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "@type",
+                            "additionalType"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                            "@type": {
+                                "const": "ImageObject"
+                            },
+                            "additionalType": {
+                                "enum": [
+                                    "Advertisement",
+                                    "Cartoon",
+                                    "Cover",
+                                    "Illustration",
+                                    "Other",
+                                    "Photograph",
+                                    "Spot"
+                                ]
+                            },
+                            "contentUrl": {
+                                "$ref": "#/$defs/archiveId"
+                            },
+                            "description": {
+                                "description": "A description of the image (to be used as altText).",
+                                "type": "string"
+                            },
+                            "caption": {
+                                "description": "The caption that appeared with the image.",
+                                "type": "string"
+                            },
+                            "creditText": {
+                                "type": "string"
+                            },
+                            "contentSize": {
+                                "type": "string"
+                            },
+                            "encodingFormat": {
+                                "type": "string"
+                            },
+                            "keywords": {
+                                "type": "array"
+                            }
+                        }
+                    }
+                }
+            }
         }
-      }
     }
-  }
 }
