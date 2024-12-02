@@ -23,8 +23,8 @@
             "$ref": "#/$defs/archiveId"
         },
         "copilotId": {
-            "description": "The copilot ID of the article.",
-            "$ref": "#/$defs/copilotId"
+            "description": "The Copilot ID of the article.",
+            "$ref": "#/$defs/objectId"
         },
         "issueDate": {
             "description": "The cover date of the issue this article is in.",
@@ -54,12 +54,12 @@
             }
         },
         "raw": {
-            "description": "A collection describing the text frames and images found on the article pages.",
+            "description": "TK",
             "type": "string"
         },
         "jsonld": {
-            "description": "A schmea.org representation of the article.",
-            "$ref": "#/$defs/jsonldRoot"
+            "description": "A schema.org representation of the article.",
+            "$ref": "#/$defs/jsonld"
         }
     },
     "$defs": {
@@ -77,93 +77,60 @@
                 }
             ]
         },
+        "jsonld": {
+            "allOf": [
+                {
+                    "$ref": "#/$defs/schema.org/baseArticle"
+                }
+            ],
+            "required": [
+                "@context",
+                "pageStart",
+                "pageEnd",
+                "isPartOf"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "@context": {
+                    "type": "string",
+                    "pattern": "^https?://schema.org$"
+                },
+                "@type": true,
+                "headline": true,
+                "articleSection": true,
+                "alternativeHeadline": true,
+                "articleBody": true,
+                "author": true,
+                "hasPart": true,
+                "itemReviewed": true,
+                "keywords": true,
+                "pageStart": {
+                    "$ref": "#/$defs/pageNumber"
+                },
+                "pageEnd": {
+                    "$ref": "#/$defs/pageNumber"
+                },
+                "url": {
+                    "description": "The URL of the article on newyorker.com.",
+                    "type": "string",
+                    "format": "uri"
+                },
+                "isPartOf": {
+                    "description": "The issue this article appears in.",
+                    "$ref": "#/$defs/schema.org/PublicationIssue"
+                },
+                "image": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/schema.org/ImageObject"
+                    }
+                }
+            }
+        },
         "objectId": {
             "description": "A MongoDB `ObjectId` identifier. See: https://www.mongodb.com/docs/manual/reference/method/ObjectId/ for more information.",
             "type": "string",
             "pattern": "^[0-9a-f]{24}$"
-        },
-        "copilotId": {
-            "$ref": "#/$defs/objectId"
-        },
-        "issueDate": {
-            "type": "string",
-            "format": "date"
-        },
-        "schemaUrl": {
-            "type": "string",
-            "pattern": "https://raw\\.githubusercontent\\.com/CondeNast/tny-archive-schemas/v1\\.\\d+\\.\\d+/article\\.schema\\.json"
-        },
-        "pageNumber": {
-            "anyOf": [
-                {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 999
-                },
-                {
-                    "type": "string",
-                    "pattern": "^CV\\d$"
-                }
-            ]
-        },
-        "boundingBox": {
-            "type": "object",
-            "required": [
-                "height",
-                "width",
-                "x",
-                "y"
-            ],
-            "additionalProperties": false,
-            "properties": {
-                "height": {
-                    "type": "integer",
-                    "minimum": 0
-                },
-                "width": {
-                    "type": "integer",
-                    "minimum": 0
-                },
-                "x": {
-                    "type": "integer",
-                    "minimum": 0
-                },
-                "y": {
-                    "type": "integer",
-                    "minimum": 0
-                }
-            }
-        },
-        "uuidv4": {
-            "description": "A V4 UUID.",
-            "type": "string",
-            "pattern": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
-        },
-        "pageItem": {
-            "type": "object",
-            "required": [
-                "id",
-                "boundingBox"
-            ],
-            "additionalProperties": false,
-            "properties": {
-                "id": {
-                    "description": "The id of the page item. Should be an archive ID for images, and a UUID for text blocks.",
-                    "type": "string",
-                    "anyOf": [
-                        {
-                            "$ref": "#/$defs/archiveId"
-                        },
-                        {
-                            "$ref": "#/$defs/uuidv4"
-                        }
-                    ]
-                },
-                "boundingBox": {
-                    "description": "The bouding box coordinates of the page item.",
-                    "$ref": "#/$defs/boundingBox"
-                }
-            }
         },
         "page": {
             "type": "object",
@@ -217,1612 +184,2536 @@
                 }
             }
         },
-        "pageStart": {
-            "description": "The page on which the article starts.",
-            "$ref": "#/$defs/pageNumber"
-        },
-        "pageEnd": {
-            "description": "The page on which the article ends.",
-            "$ref": "#/$defs/pageNumber"
-        },
-        "Place": {
+        "pageItem": {
             "type": "object",
             "required": [
-                "@type",
-                "name"
+                "id",
+                "boundingBox"
             ],
-            "properties": {
-                "@type": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "address": {
-                    "type": "string"
-                },
-                "telephone": {
-                    "type": "string"
-                },
-                "url": {
-                    "type": "string"
-                }
-            }
-        },
-        "Schedule": {
-            "type": "object",
-            "required": [
-                "@type",
-                "description"
-            ],
-            "properties": {
-                "@type": {
-                    "const": "Schedule"
-                },
-                "description": {
-                    "type": "string"
-                }
-            }
-        },
-        "Event": {
-            "type": "object",
-            "required": [
-                "@type"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "location": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "$ref": "#/$defs/Place"
-                    }
-                },
-                "eventSchedule": {
-                    "type": "object",
-                    "$ref": "#/$defs/Schedule"
-                }
-            }
-        },
-        "Person": {
-            "type": "object",
             "additionalProperties": false,
-            "required": [
-                "@type",
-                "name"
-            ],
             "properties": {
-                "@type": {
-                    "const": "Person"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "Organization": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type",
-                "name"
-            ],
-            "properties": {
-                "@type": {
-                    "const": "Organization"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "Museum": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type",
-                "name"
-            ],
-            "allOf": [
-                {
-                    "$ref": "#/$defs/Place"
-                }
-            ],
-            "properties": {
-                "name": true,
-                "address": true,
-                "telephone": true,
-                "url": true,
-                "@type": {
-                    "const": "Museum"
-                },
-                "event": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/ExhibitionEvent"
-                    }
-                }
-            }
-        },
-        "ExhibitionEvent": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type"
-            ],
-            "allOf": [
-                {
-                    "$ref": "#/$defs/Event"
-                }
-            ],
-            "properties": {
-                "name": true,
-                "eventSchedule": true,
-                "@type": {
-                    "const": "ExhibitionEvent"
-                },
-                "about": {
-                    "type": "array",
-                    "items": {
-                        "anyOf": [
-                            {
-                                "$ref": "#/$defs/Person"
-                            },
-                            {
-                                "$ref": "#/$defs/Organization"
-                            }
-                        ]
-                    }
-                },
-                "location": {
-                    "type": "array",
-                    "items": {
-                        "anyOf": [
-                            {
-                                "$ref": "#/$defs/ArtGallery"
-                            },
-                            {
-                                "$ref": "#/$defs/Museum"
-                            }
-                        ]
-                    }
-                }
-            }
-        },
-        "ArtGallery": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type",
-                "name"
-            ],
-            "allOf": [
-                {
-                    "$ref": "#/$defs/Place"
-                }
-            ],
-            "properties": {
-                "name": true,
-                "address": true,
-                "telephone": true,
-                "url": true,
-                "@type": {
-                    "const": "ArtGallery"
-                },
-                "event": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/ExhibitionEvent"
-                    }
-                }
-            }
-        },
-        "MusicGroup": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type",
-                "name"
-            ],
-            "properties": {
-                "@type": {
-                    "const": "MusicGroup"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "MusicVenue": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type",
-                "name"
-            ],
-            "allOf": [
-                {
-                    "$ref": "#/$defs/Place"
-                }
-            ],
-            "properties": {
-                "name": true,
-                "address": true,
-                "telephone": true,
-                "url": true,
-                "@type": {
-                    "const": "MusicVenue"
-                },
-                "event": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/MusicEvent"
-                    }
-                }
-            }
-        },
-        "MusicEvent": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type"
-            ],
-            "allOf": [
-                {
-                    "$ref": "#/$defs/Event"
-                }
-            ],
-            "properties": {
-                "name": true,
-                "eventSchedule": true,
-                "@type": {
-                    "const": "MusicEvent"
-                },
-                "location": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/MusicVenue"
-                    }
-                },
-                "performer": {
-                    "type": "array",
-                    "items": {
-                        "anyOf": [
-                            {
-                                "$ref": "#/$defs/Person"
-                            },
-                            {
-                                "$ref": "#/$defs/MusicGroup"
-                            }
-                        ]
-                    }
-                },
-                "workPerformed": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/MusicComposition"
-                    }
-                }
-            }
-        },
-        "BarOrPub": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type",
-                "name"
-            ],
-            "allOf": [
-                {
-                    "$ref": "#/$defs/Place"
-                }
-            ],
-            "properties": {
-                "name": true,
-                "address": true,
-                "telephone": true,
-                "url": true,
-                "@type": {
-                    "const": "BarOrPub"
-                },
-                "event": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/MusicEvent"
-                    }
-                }
-            }
-        },
-        "Book": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type",
-                "name"
-            ],
-            "properties": {
-                "@type": {
-                    "const": "Book"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "author": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "anyOf": [
-                            {
-                                "$ref": "#/$defs/Person"
-                            },
-                            {
-                                "$ref": "#/$defs/Organization"
-                            }
-                        ]
-                    }
-                },
-                "publisher": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "anyOf": [
-                            {
-                                "$ref": "#/$defs/Person"
-                            },
-                            {
-                                "$ref": "#/$defs/Organization"
-                            }
-                        ]
-                    }
-                },
-                "translator": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "anyOf": [
-                            {
-                                "$ref": "#/$defs/Person"
-                            },
-                            {
-                                "$ref": "#/$defs/Organization"
-                            }
-                        ]
-                    }
-                },
-                "isbn": {
-                    "type": "string",
-                    "pattern": "^(97[89])?\\d{9}[0-9X]$"
-                },
-                "sameAs": {
-                    "type": "string",
-                    "description": "worldcat url",
-                    "examples": [
-                        "https://www.worldcat.org/oclc/218682"
-                    ]
-                }
-            }
-        },
-        "PerformingGroup": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type",
-                "name"
-            ],
-            "properties": {
-                "@type": {
-                    "const": "PerformingGroup"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "Play": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type",
-                "name"
-            ],
-            "properties": {
-                "@type": {
-                    "const": "Play"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "author": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "anyOf": [
-                            {
-                                "$ref": "#/$defs/Person"
-                            },
-                            {
-                                "$ref": "#/$defs/Organization"
-                            }
-                        ]
-                    }
-                },
-                "translator": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "anyOf": [
-                            {
-                                "$ref": "#/$defs/Person"
-                            },
-                            {
-                                "$ref": "#/$defs/Organization"
-                            }
-                        ]
-                    }
-                }
-            }
-        },
-        "TheaterEvent": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type"
-            ],
-            "allOf": [
-                {
-                    "$ref": "#/$defs/Event"
-                }
-            ],
-            "properties": {
-                "name": true,
-                "eventSchedule": true,
-                "@type": {
-                    "const": "TheaterEvent"
-                },
-                "location": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/PerformingArtsTheater"
-                    }
-                },
-                "actor": {
-                    "type": "array",
-                    "items": {
-                        "anyOf": [
-                            {
-                                "$ref": "#/$defs/Person"
-                            },
-                            {
-                                "$ref": "#/$defs/PerformingGroup"
-                            }
-                        ]
-                    }
-                },
-                "director": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/Person"
-                    }
-                },
-                "workPerformed": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/Play"
-                    }
-                },
-                "sameAs": {
-                    "type": "string",
-                    "description": "IBDB or IOBDB url",
-                    "examples": [
-                        "http://www.iobdb.com/Production/3307",
-                        "https://www.ibdb.com/broadway-production/the-front-page-3298"
-                    ]
-                }
-            }
-        },
-        "PerformingArtsTheater": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type",
-                "name"
-            ],
-            "allOf": [
-                {
-                    "$ref": "#/$defs/Place"
-                }
-            ],
-            "properties": {
-                "name": true,
-                "address": true,
-                "telephone": true,
-                "url": true,
-                "@type": {
-                    "const": "PerformingArtsTheater"
-                },
-                "event": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/TheaterEvent"
-                    }
-                }
-            }
-        },
-        "ComedyEvent": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type"
-            ],
-            "allOf": [
-                {
-                    "$ref": "#/$defs/Event"
-                }
-            ],
-            "properties": {
-                "name": true,
-                "eventSchedule": true,
-                "@type": {
-                    "const": "ComedyEvent"
-                },
-                "location": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/PerformingArtsTheater"
-                    }
-                },
-                "performer": {
-                    "type": "array",
-                    "items": {
-                        "anyOf": [
-                            {
-                                "$ref": "#/$defs/Person"
-                            },
-                            {
-                                "$ref": "#/$defs/Organization"
-                            }
-                        ]
-                    }
-                }
-            }
-        },
-        "CreativeWork": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type",
-                "name"
-            ],
-            "properties": {
-                "@type": {
-                    "const": "CreativeWork"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "creator": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "anyOf": [
-                            {
-                                "$ref": "#/$defs/Person"
-                            },
-                            {
-                                "$ref": "#/$defs/Organization"
-                            }
-                        ]
-                    }
-                }
-            }
-        },
-        "DanceGroup": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type",
-                "name"
-            ],
-            "properties": {
-                "@type": {
-                    "const": "DanceGroup"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "DanceEvent": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type"
-            ],
-            "allOf": [
-                {
-                    "$ref": "#/$defs/Event"
-                }
-            ],
-            "properties": {
-                "name": true,
-                "eventSchedule": true,
-                "@type": {
-                    "const": "DanceEvent"
-                },
-                "location": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/PerformingArtsTheater"
-                    }
-                },
-                "performer": {
-                    "type": "array",
-                    "items": {
-                        "anyOf": [
-                            {
-                                "$ref": "#/$defs/Person"
-                            },
-                            {
-                                "$ref": "#/$defs/DanceGroup"
-                            }
-                        ]
-                    }
-                },
-                "workPerformed": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/CreativeWork"
-                    }
-                }
-            }
-        },
-        "LandmarksOrHistoricalBuildings": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type",
-                "name"
-            ],
-            "allOf": [
-                {
-                    "$ref": "#/$defs/Place"
-                }
-            ],
-            "properties": {
-                "name": true,
-                "address": true,
-                "telephone": true,
-                "url": true,
-                "@type": {
-                    "const": "LandmarksOrHistoricalBuildings"
-                },
-                "creator": {
-                    "type": "array",
-                    "items": {
-                        "anyOf": [
-                            {
-                                "$ref": "#/$defs/Person"
-                            },
-                            {
-                                "$ref": "#/$defs/Organization"
-                            }
-                        ]
-                    }
-                }
-            }
-        },
-        "Movie": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type",
-                "name"
-            ],
-            "properties": {
-                "@type": {
-                    "const": "Movie"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "director": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "$ref": "#/$defs/Person"
-                    }
-                },
-                "productionCompany": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "$ref": "#/$defs/Organization"
-                    }
-                },
-                "inLanguage": {
-                    "type": "string"
-                },
-                "subtitleLanguage": {
-                    "type": "string"
-                },
-                "copyrightYear": {
-                    "type": "number"
-                },
-                "actor": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "anyOf": [
-                            {
-                                "$ref": "#/$defs/Person"
-                            },
-                            {
-                                "$ref": "#/$defs/Organization"
-                            }
-                        ]
-                    }
-                },
-                "musicBy": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "anyOf": [
-                            {
-                                "$ref": "#/$defs/Person"
-                            },
-                            {
-                                "$ref": "#/$defs/Organization"
-                            }
-                        ]
-                    }
-                },
-                "sameAs": {
-                    "type": "string",
-                    "description": "imdb url",
-                    "examples": [
-                        "https://www.imdb.com/title/tt0075612"
-                    ]
-                }
-            }
-        },
-        "MusicRelease": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type",
-                "recordLabel"
-            ],
-            "properties": {
-                "@type": {
-                    "const": "MusicRelease"
-                },
-                "recordLabel": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/Organization"
-                    }
-                },
-                "releaseOf": {
-                    "type": "array",
-                    "items": {
-                        "anyOf": [
-                            {
-                                "$ref": "#/$defs/MusicAlbum"
-                            },
-                            {
-                                "$ref": "#/$defs/MusicRecording"
-                            }
-                        ]
-                    }
-                }
-            }
-        },
-        "MusicRecording": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type",
-                "name"
-            ],
-            "properties": {
-                "@type": {
-                    "const": "MusicRecording"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "byArtist": {
-                    "type": "array",
-                    "items": {
-                        "anyOf": [
-                            {
-                                "$ref": "#/$defs/Person"
-                            },
-                            {
-                                "$ref": "#/$defs/MusicGroup"
-                            }
-                        ]
-                    }
-                },
-                "inAlbum": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/MusicAlbum"
-                    }
-                },
-                "release": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/MusicRelease"
-                    }
-                }
-            }
-        },
-        "MusicAlbum": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type",
-                "name"
-            ],
-            "properties": {
-                "@type": {
-                    "const": "MusicAlbum"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "albumRelease": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/MusicRelease"
-                    }
-                },
-                "byArtist": {
-                    "type": "array",
-                    "items": {
-                        "anyOf": [
-                            {
-                                "$ref": "#/$defs/Person"
-                            },
-                            {
-                                "$ref": "#/$defs/MusicGroup"
-                            }
-                        ]
-                    }
-                },
-                "track": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/MusicRecording"
-                    }
-                }
-            }
-        },
-        "NightClub": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type",
-                "name"
-            ],
-            "allOf": [
-                {
-                    "$ref": "#/$defs/Place"
-                }
-            ],
-            "properties": {
-                "name": true,
-                "address": true,
-                "telephone": true,
-                "url": true,
-                "@type": {
-                    "const": "NightClub"
-                },
-                "event": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/MusicEvent"
-                    }
-                }
-            }
-        },
-        "Restaurant": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type",
-                "name"
-            ],
-            "allOf": [
-                {
-                    "$ref": "#/$defs/Place"
-                }
-            ],
-            "properties": {
-                "name": true,
-                "address": true,
-                "telephone": true,
-                "url": true,
-                "@type": {
-                    "const": "Restaurant"
-                },
-                "event": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/MusicEvent"
-                    }
-                }
-            }
-        },
-        "MovieTheater": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type",
-                "name"
-            ],
-            "allOf": [
-                {
-                    "$ref": "#/$defs/Place"
-                }
-            ],
-            "properties": {
-                "name": true,
-                "address": true,
-                "telephone": true,
-                "url": true,
-                "@type": {
-                    "const": "MovieTheater"
-                },
-                "event": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/ScreeningEvent"
-                    }
-                }
-            }
-        },
-        "ScreeningEvent": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type"
-            ],
-            "allOf": [
-                {
-                    "$ref": "#/$defs/Event"
-                }
-            ],
-            "properties": {
-                "name": true,
-                "eventSchedule": true,
-                "@type": {
-                    "const": "ScreeningEvent"
-                },
-                "location": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/MovieTheater"
-                    }
-                },
-                "workPresented": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/Movie"
-                    }
-                }
-            }
-        },
-        "SportsEvent": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type"
-            ],
-            "allOf": [
-                {
-                    "$ref": "#/$defs/Event"
-                }
-            ],
-            "properties": {
-                "name": true,
-                "eventSchedule": true,
-                "@type": {
-                    "const": "SportsEvent"
-                },
-                "sport": {
-                    "type": "text"
-                },
-                "location": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/Place"
-                    }
-                },
-                "competitor": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "anyOf": [
-                            {
-                                "$ref": "#/$defs/Person"
-                            },
-                            {
-                                "$ref": "#/$defs/Organization"
-                            }
-                        ]
-                    }
-                }
-            }
-        },
-        "Episode": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type"
-            ],
-            "properties": {
-                "@type": {
-                    "const": "Episode"
-                },
-                "episodeNumber": "number",
-                "name": {
-                    "type": "string"
-                },
-                "director": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "$ref": "#/$defs/Person"
-                    }
-                },
-                "productionCompany": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "$ref": "#/$defs/Organization"
-                    }
-                },
-                "inLanguage": {
-                    "type": "string"
-                },
-                "subtitleLanguage": {
-                    "type": "string"
-                },
-                "copyrightYear": {
-                    "type": "number"
-                },
-                "actor": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "anyOf": [
-                            {
-                                "$ref": "#/$defs/Person"
-                            },
-                            {
-                                "$ref": "#/$defs/Organization"
-                            }
-                        ]
-                    }
-                },
-                "musicBy": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "anyOf": [
-                            {
-                                "$ref": "#/$defs/Person"
-                            },
-                            {
-                                "$ref": "#/$defs/Organization"
-                            }
-                        ]
-                    }
-                },
-                "sameAs": {
-                    "type": "string",
-                    "description": "imdb url",
-                    "examples": [
-                        "https://www.imdb.com/title/tt0075612"
-                    ]
-                },
-                "partOfSeason": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/TVSeason"
-                    }
-                }
-            }
-        },
-        "TVSeries": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type",
-                "name"
-            ],
-            "properties": {
-                "@type": {
-                    "const": "TVSeries"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "creator": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "$ref": "#/$defs/Person"
-                    }
-                },
-                "productionCompany": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "$ref": "#/$defs/Organization"
-                    }
-                },
-                "inLanguage": {
-                    "type": "string"
-                },
-                "subtitleLanguage": {
-                    "type": "string"
-                },
-                "copyrightYear": {
-                    "type": "number"
-                },
-                "actor": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "anyOf": [
-                            {
-                                "$ref": "#/$defs/Person"
-                            },
-                            {
-                                "$ref": "#/$defs/Organization"
-                            }
-                        ]
-                    }
-                },
-                "musicBy": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "anyOf": [
-                            {
-                                "$ref": "#/$defs/Person"
-                            },
-                            {
-                                "$ref": "#/$defs/Organization"
-                            }
-                        ]
-                    }
-                },
-                "sameAs": {
-                    "type": "string",
-                    "description": "imdb url",
-                    "examples": [
-                        "https://www.imdb.com/title/tt0075612"
-                    ]
-                },
-                "containsSeason": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/TVSeason"
-                    }
-                }
-            }
-        },
-        "TVSeason": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-                "@type",
-                "seasonNumber"
-            ],
-            "properties": {
-                "@type": {
-                    "const": "TVSeason"
-                },
-                "seasonNumber": {
-                    "type": "number"
-                },
-                "productionCompany": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "$ref": "#/$defs/Organization"
-                    }
-                },
-                "inLanguage": {
-                    "type": "string"
-                },
-                "subtitleLanguage": {
-                    "type": "string"
-                },
-                "copyrightYear": {
-                    "type": "number"
-                },
-                "actor": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "anyOf": [
-                            {
-                                "$ref": "#/$defs/Person"
-                            },
-                            {
-                                "$ref": "#/$defs/Organization"
-                            }
-                        ]
-                    }
-                },
-                "musicBy": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "anyOf": [
-                            {
-                                "$ref": "#/$defs/Person"
-                            },
-                            {
-                                "$ref": "#/$defs/Organization"
-                            }
-                        ]
-                    }
-                },
-                "sameAs": {
-                    "type": "string",
-                    "description": "imdb url",
-                    "examples": [
-                        "https://www.imdb.com/title/tt0075612"
-                    ]
-                },
-                "partOfSeries": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/TVSeries"
-                    }
-                },
-                "episode": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/$defs/Episode"
-                    }
-                }
-            }
-        },
-        "jsonldBase": {
-            "type": "object",
-            "required": [
-                "@type"
-            ],
-            "properties": {
-                "@type": {
-                    "description": "The schema.org type.",
-                    "type": "array",
+                "id": {
+                    "description": "The id of the page item. Should be an archive ID for images, and a UUID for text blocks.",
                     "anyOf": [
                         {
-                            "const": [
-                                "Article"
-                            ]
+                            "$ref": "#/$defs/archiveId"
                         },
                         {
-                            "const": [
-                                "Article",
-                                "Review"
-                            ]
+                            "$ref": "#/$defs/uuidv4"
                         }
                     ]
                 },
-                "headline": {
-                    "description": "The main headline of the article. Also referred to as the `hed` or `printHed`.",
-                    "type": "string"
-                },
-                "articleSection": {
-                    "description": "The section or sections (rubrics) the article falls under.",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "alternativeHeadline": {
-                    "description": "The secondary headline of the article. Also referred to as the `dek` or `printDek`.",
-                    "type": "string"
-                },
-                "articleBody": {
-                    "description": "The main content of the article, in markup.",
-                    "type": "string"
-                },
-                "author": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "@type": {
-                                "const": "Person"
-                            },
-                            "name": {
-                                "type": "string"
-                            }
+                "boundingBox": {
+                    "description": "The bouding box coordinates of the page item.",
+                    "type": "object",
+                    "required": [
+                        "height",
+                        "width",
+                        "x",
+                        "y"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "height": {
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "width": {
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "x": {
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "y": {
+                            "type": "integer",
+                            "minimum": 0
                         }
-                    }
-                },
-                "hasPart": {
-                    "type": "array",
-                    "items": {
-                        "anyOf": [
-                            {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "$ref": "#/$defs/jsonldBase"
-                            },
-                            {
-                                "type": "object",
-                                "description": "A referenced article (for root articles only).",
-                                "additionalProperties": false,
-                                "properties": {
-                                    "@type": {
-                                        "const": [
-                                            "Article"
-                                        ]
-                                    },
-                                    "sameAs": {
-                                        "$ref": "#/$defs/archiveId"
-                                    }
-                                }
-                            },
-                            {
-                                "type": "object",
-                                "description": "Supplemental text, often at the start or end of the article, perhaps following a signer. This may be an italicized note, such as a translation credit or additional context like “This is the first part of a two-part Profile.” In the “Goings on About Town” section, this would correspond to italicized details about schedules and locations following an event’s description.",
-                                "required": [
-                                    "@type",
-                                    "additionalType",
-                                    "text"
-                                ],
-                                "additionalProperties": false,
-                                "properties": {
-                                    "@type": {
-                                        "const": "CreativeWork"
-                                    },
-                                    "additionalType": {
-                                        "const": "Note"
-                                    },
-                                    "text": {
-                                        "type": "string"
-                                    }
-                                }
-                            }
-                        ]
-                    }
-                },
-                "itemReviewed": {
-                    "type": "array",
-                    "description": "Things reviewed in the article, if applicable.",
-                    "items": {
-                        "type": "object",
-                        "description": "The relevant schema.org type",
-                        "anyOf": [
-                            {
-                                "$ref": "#/$defs/ArtGallery"
-                            },
-                            {
-                                "$ref": "#/$defs/BarOrPub"
-                            },
-                            {
-                                "$ref": "#/$defs/Book"
-                            },
-                            {
-                                "$ref": "#/$defs/ComedyEvent"
-                            },
-                            {
-                                "$ref": "#/$defs/DanceEvent"
-                            },
-                            {
-                                "$ref": "#/$defs/ExhibitionEvent"
-                            },
-                            {
-                                "$ref": "#/$defs/Event"
-                            },
-                            {
-                                "$ref": "#/$defs/LandmarksOrHistoricalBuildings"
-                            },
-                            {
-                                "$ref": "#/$defs/Movie"
-                            },
-                            {
-                                "$ref": "#/$defs/MusicAlbum"
-                            },
-                            {
-                                "$ref": "#/$defs/MusicEvent"
-                            },
-                            {
-                                "$ref": "#/$defs/MusicRecording"
-                            },
-                            {
-                                "$ref": "#/$defs/MusicRelease"
-                            },
-                            {
-                                "$ref": "#/$defs/MusicVenue"
-                            },
-                            {
-                                "$ref": "#/$defs/NightClub"
-                            },
-                            {
-                                "$ref": "#/$defs/Restaurant"
-                            },
-                            {
-                                "$ref": "#/$defs/ScreeningEvent"
-                            },
-                            {
-                                "$ref": "#/$defs/SportsEvent"
-                            },
-                            {
-                                "$ref": "#/$defs/TheaterEvent"
-                            },
-                            {
-                                "$ref": "#/$defs/TVSeason"
-                            },
-                            {
-                                "$ref": "#/$defs/TVSeries"
-                            }
-                        ]
-                    }
-                },
-                "keywords": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
                     }
                 }
             }
         },
-        "jsonldRoot": {
-            "type": "object",
-            "required": [
-                "@context",
-                "pageStart",
-                "pageEnd",
-                "isPartOf"
-            ],
-            "allOf": [
+        "pageNumber": {
+            "anyOf": [
                 {
-                    "$ref": "#/$defs/jsonldBase"
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 999
+                },
+                {
+                    "type": "string",
+                    "pattern": "^CV\\d$"
                 }
-            ],
-            "additionalProperties": false,
-            "properties": {
-                "@type": true,
-                "headline": true,
-                "articleSection": true,
-                "alternativeHeadline": true,
-                "articleBody": true,
-                "author": true,
-                "hasPart": true,
-                "itemReviewed": true,
-                "keywords": true,
-                "@context": {
-                    "type": "string",
-                    "pattern": "^https?://schema.org$"
-                },
-                "pageStart": {
-                    "$ref": "#/$defs/pageStart"
-                },
-                "pageEnd": {
-                    "$ref": "#/$defs/pageEnd"
-                },
-                "url": {
-                    "description": "The URL of the article on newyorker.com.",
-                    "type": "string",
-                    "format": "uri"
-                },
-                "isPartOf": {
-                    "description": "The issue this article appears in.",
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": [
-                        "@type",
-                        "issueNumber",
-                        "datePublished",
-                        "isPartOf",
-                        "url"
-                    ],
-                    "properties": {
-                        "@type": {
-                            "const": "PublicationIssue"
-                        },
-                        "name": {
-                            "type": "string",
-                            "description": "The name of the issue, as printed on the cover, near the page numbers or on the table of contents.",
-                            "examples": [
-                                "June 7, 1969",
-                                "June 27 & July 4, 1994",
-                                "December 25, 2000 & January 1, 2001",
-                                "August 19 & 26, 2002"
-                            ]
-                        },
-                        "issueNumber": {
-                            "type": "integer",
-                            "minimum": 1
-                        },
-                        "datePublished": {
-                            "description": "The publish date of the issue.",
-                            "type": "string",
-                            "format": "date"
-                        },
-                        "url": {
-                            "description": "The URL of the issue on newyorker.com.",
-                            "type": "string",
-                            "format": "uri"
-                        },
-                        "isPartOf": {
-                            "type": "object",
-                            "additionalProperties": false,
-                            "required": [],
+            ]
+        },
+        "schemaUrl": {
+            "type": "string",
+            "pattern": "https://raw\\.githubusercontent\\.com/CondeNast/tny-archive-schemas/v1\\.\\d+\\.\\d+/article\\.schema\\.json"
+        },
+        "uuidv4": {
+            "description": "A V4 UUID.",
+            "type": "string",
+            "pattern": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+        },
+        "schema.org": {
+            "anyCreativeWork": {
+                "allOf": [
+                    {
+                        "if": {
                             "properties": {
                                 "@type": {
-                                    "const": "PublicationVolume"
-                                },
-                                "volumeNumber": {
-                                    "type": "integer",
-                                    "minimum": 1
+                                    "const": "Book"
                                 }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/Book"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "Episode"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/Episode"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "Movie"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/Movie"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "MusicAlbum"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/MusicAlbum"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "MusicRecording"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/MusicRecording"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "MusicRelease"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/MusicRelease"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "TVSeason"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/TVSeason"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "TVSeries"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/TVSeries"
+                        }
+                    },
+                    {
+                        "if": {
+                            "not": {
+                                "anyOf": [
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "Book"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "Episode"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "Movie"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "MusicAlbum"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "MusicRecording"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "MusicRelease"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "TVSeason"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "TVSeries"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    }
+                                ]
                             }
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/genericCreativeWork"
                         }
                     }
-                },
-                "image": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "required": [
-                            "@type",
-                            "additionalType"
-                        ],
-                        "additionalProperties": false,
-                        "properties": {
-                            "@type": {
-                                "const": "ImageObject"
+                ]
+            },
+            "anyEvent": {
+                "allOf": [
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "ComedyEvent"
+                                }
                             },
-                            "additionalType": {
-                                "enum": [
-                                    "Advertisement",
-                                    "Cartoon",
-                                    "Cover",
-                                    "Illustration",
-                                    "Other",
-                                    "Photograph",
-                                    "Spot"
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/ComedyEvent"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "DanceEvent"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/DanceEvent"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "ExhibitionEvent"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/ExhibitionEvent"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "MusicEvent"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/MusicEvent"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "ScreeningEvent"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/ScreeningEvent"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "SportsEvent"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/SportsEvent"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "TheaterEvent"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/TheaterEvent"
+                        }
+                    },
+                    {
+                        "if": {
+                            "not": {
+                                "anyOf": [
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "ComedyEvent"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "DanceEvent"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "ExhibitionEvent"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "MusicEvent"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "ScreeningEvent"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "SportsEvent"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "TheaterEvent"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/genericEvent"
+                        }
+                    }
+                ]
+            },
+            "anyPlace": {
+                "anyOf": [
+                    {
+                        "$ref": "#/$defs/schema.org/genericPlace"
+                    },
+                    {
+                        "$ref": "#/$defs/schema.org/ArtGallery"
+                    },
+                    {
+                        "$ref": "#/$defs/schema.org/BarOrPub"
+                    },
+                    {
+                        "$ref": "#/$defs/schema.org/LandmarksOrHistoricalBuildings"
+                    },
+                    {
+                        "$ref": "#/$defs/schema.org/MovieTheater"
+                    },
+                    {
+                        "$ref": "#/$defs/schema.org/Museum"
+                    },
+                    {
+                        "$ref": "#/$defs/schema.org/MusicVenue"
+                    },
+                    {
+                        "$ref": "#/$defs/schema.org/NightClub"
+                    },
+                    {
+                        "$ref": "#/$defs/schema.org/PerformingArtsTheater"
+                    },
+                    {
+                        "$ref": "#/$defs/schema.org/Restaurant"
+                    }
+                ]
+            },
+            "ArtGallery": {
+                "allOf": [
+                    {
+                        "$ref": "#/$defs/schema.org/basePlace"
+                    }
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "@type": {
+                        "const": "ArtGallery"
+                    },
+                    "name": true,
+                    "address": true,
+                    "telephone": true,
+                    "url": true,
+                    "event": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/ExhibitionEvent"
+                        }
+                    },
+                    "openingHours": {
+                        "type": "string"
+                    }
+                }
+            },
+            "Article": {
+                "allOf": [
+                    {
+                        "$ref": "#/$defs/schema.org/baseArticle"
+                    }
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "@type": true,
+                    "headline": true,
+                    "articleSection": true,
+                    "alternativeHeadline": true,
+                    "articleBody": true,
+                    "author": true,
+                    "hasPart": true,
+                    "itemReviewed": true,
+                    "keywords": true
+                }
+            },
+            "referencedArticle": {
+                "type": "object",
+                "description": "A referenced article (for root articles only).",
+                "required": [
+                    "@type",
+                    "sameAs"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "@type": {
+                        "const": [
+                            "Article"
+                        ]
+                    },
+                    "sameAs": {
+                        "$ref": "#/$defs/archiveId"
+                    }
+                }
+            },
+            "BarOrPub": {
+                "allOf": [
+                    {
+                        "$ref": "#/$defs/schema.org/basePlace"
+                    }
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "@type": {
+                        "const": "BarOrPub"
+                    },
+                    "name": true,
+                    "address": true,
+                    "telephone": true,
+                    "url": true,
+                    "event": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/MusicEvent"
+                        }
+                    }
+                }
+            },
+            "baseArticle": {
+                "type": "object",
+                "required": [
+                    "@type"
+                ],
+                "properties": {
+                    "@type": {
+                        "description": "The schema.org type.",
+                        "type": "array",
+                        "anyOf": [
+                            {
+                                "const": [
+                                    "Article"
                                 ]
                             },
-                            "contentUrl": {
-                                "$ref": "#/$defs/archiveId"
-                            },
-                            "description": {
-                                "description": "A description of the image (to be used as altText).",
-                                "type": "string"
-                            },
-                            "caption": {
-                                "description": "The caption that appeared with the image.",
-                                "type": "string"
-                            },
-                            "creditText": {
-                                "type": "string"
-                            },
-                            "contentSize": {
-                                "type": "string"
-                            },
-                            "encodingFormat": {
-                                "type": "string"
-                            },
-                            "keywords": {
-                                "type": "array"
+                            {
+                                "const": [
+                                    "Article",
+                                    "Review"
+                                ]
                             }
+                        ]
+                    },
+                    "headline": {
+                        "description": "The main headline of the article. Also referred to as the `hed` or `printHed`.",
+                        "type": "string"
+                    },
+                    "articleSection": {
+                        "description": "The section or sections (rubrics) the article falls under.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "alternativeHeadline": {
+                        "description": "The secondary headline of the article. Also referred to as the `dek` or `printDek`.",
+                        "type": "string"
+                    },
+                    "articleBody": {
+                        "description": "The main content of the article, in markup.",
+                        "type": "string"
+                    },
+                    "author": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/Person"
+                        }
+                    },
+                    "hasPart": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/Article"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/Note"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/referencedArticle"
+                                }
+                            ]
+                        }
+                    },
+                    "itemReviewed": {
+                        "type": "array",
+                        "description": "Things reviewed in the article, if applicable.",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/itemReviewed"
+                        }
+                    },
+                    "keywords": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "baseEvent": {
+                "type": "object",
+                "required": [
+                    "@type"
+                ],
+                "properties": {
+                    "@type": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "location": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/anyPlace"
+                        }
+                    },
+                    "eventSchedule": {
+                        "type": "object",
+                        "$ref": "#/$defs/schema.org/Schedule"
+                    }
+                }
+            },
+            "basePlace": {
+                "type": "object",
+                "required": [
+                    "@type",
+                    "name"
+                ],
+                "properties": {
+                    "@type": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "address": {
+                        "type": "string"
+                    },
+                    "telephone": {
+                        "type": "string"
+                    },
+                    "url": {
+                        "type": "string",
+                        "format": "uri"
+                    }
+                }
+            },
+            "Book": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "@type",
+                    "name"
+                ],
+                "properties": {
+                    "@type": {
+                        "const": "Book"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "author": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/Person"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/Organization"
+                                }
+                            ]
+                        }
+                    },
+                    "publisher": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/Person"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/Organization"
+                                }
+                            ]
+                        }
+                    },
+                    "translator": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/Person"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/Organization"
+                                }
+                            ]
+                        }
+                    },
+                    "isbn": {
+                        "type": "string",
+                        "pattern": "^(97[89])?\\d{9}[0-9X]$"
+                    },
+                    "sameAs": {
+                        "type": "string",
+                        "description": "worldcat url",
+                        "examples": [
+                            "https://www.worldcat.org/oclc/218682"
+                        ]
+                    }
+                }
+            },
+            "BroadcastEvent": {
+                "allOf": [
+                    {
+                        "$ref": "#/$defs/schema.org/baseEvent"
+                    }
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "@type": {
+                        "const": "BroadcastEvent"
+                    },
+                    "name": true,
+                    "eventSchedule": true,
+                    "broadcastOfEvent": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/anyEvent"
+                        }
+                    },
+                    "performer": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/Person"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/Organization"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "ComedyEvent": {
+                "allOf": [
+                    {
+                        "$ref": "#/$defs/schema.org/baseEvent"
+                    }
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "@type": {
+                        "const": "ComedyEvent"
+                    },
+                    "name": true,
+                    "eventSchedule": true,
+                    "location": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/PerformingArtsTheater"
+                        }
+                    },
+                    "performer": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/Person"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/Organization"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "DanceEvent": {
+                "allOf": [
+                    {
+                        "$ref": "#/$defs/schema.org/baseEvent"
+                    }
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "@type": {
+                        "const": "DanceEvent"
+                    },
+                    "name": true,
+                    "eventSchedule": true,
+                    "location": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/PerformingArtsTheater"
+                        }
+                    },
+                    "performer": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/Person"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/Organization"
+                                }
+                            ]
+                        }
+                    },
+                    "workPerformed": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/genericCreativeWork"
+                        }
+                    }
+                }
+            },
+            "DanceGroup": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "@type",
+                    "name"
+                ],
+                "properties": {
+                    "@type": {
+                        "const": "DanceGroup"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                }
+            },
+            "Episode": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "@type"
+                ],
+                "properties": {
+                    "@type": {
+                        "const": "Episode"
+                    },
+                    "episodeNumber": "number",
+                    "name": {
+                        "type": "string"
+                    },
+                    "director": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "$ref": "#/$defs/schema.org/Person"
+                        }
+                    },
+                    "productionCompany": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "$ref": "#/$defs/schema.org/Organization"
+                        }
+                    },
+                    "inLanguage": {
+                        "type": "string"
+                    },
+                    "subtitleLanguage": {
+                        "type": "string"
+                    },
+                    "copyrightYear": {
+                        "type": "number"
+                    },
+                    "actor": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/Person"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/Organization"
+                                }
+                            ]
+                        }
+                    },
+                    "musicBy": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/Person"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/Organization"
+                                }
+                            ]
+                        }
+                    },
+                    "sameAs": {
+                        "type": "string",
+                        "description": "imdb url",
+                        "examples": [
+                            "https://www.imdb.com/title/tt0075612"
+                        ]
+                    },
+                    "partOfSeason": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/TVSeason"
+                        }
+                    }
+                }
+            },
+            "ExhibitionEvent": {
+                "allOf": [
+                    {
+                        "$ref": "#/$defs/schema.org/baseEvent"
+                    }
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "@type": {
+                        "const": "ExhibitionEvent"
+                    },
+                    "name": true,
+                    "eventSchedule": true,
+                    "about": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/Person"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/Organization"
+                                }
+                            ]
+                        }
+                    },
+                    "location": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/ArtGallery"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/Museum"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "genericCreativeWork": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "@type",
+                    "name"
+                ],
+                "properties": {
+                    "@type": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "creator": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/Person"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/Organization"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "genericEvent": {
+                "allOf": [
+                    {
+                        "$ref": "#/$defs/schema.org/baseEvent"
+                    }
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "@type": true,
+                    "name": true,
+                    "location": true,
+                    "eventSchedule": true
+                }
+            },
+            "genericPlace": {
+                "allOf": [
+                    {
+                        "$ref": "#/$defs/schema.org/basePlace"
+                    }
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "@type": true,
+                    "name": true,
+                    "address": true,
+                    "telephone": true,
+                    "url": true
+                }
+            },
+            "ImageObject": {
+                "type": "object",
+                "required": [
+                    "@type",
+                    "additionalType"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "@type": {
+                        "const": "ImageObject"
+                    },
+                    "additionalType": {
+                        "enum": [
+                            "Advertisement",
+                            "Cartoon",
+                            "Cover",
+                            "Illustration",
+                            "Other",
+                            "Photograph",
+                            "Spot"
+                        ]
+                    },
+                    "contentUrl": {
+                        "$ref": "#/$defs/archiveId"
+                    },
+                    "description": {
+                        "description": "A description of the image (to be used as altText).",
+                        "type": "string"
+                    },
+                    "caption": {
+                        "description": "The caption that appeared with the image.",
+                        "type": "string"
+                    },
+                    "creditText": {
+                        "type": "string"
+                    },
+                    "contentSize": {
+                        "type": "string"
+                    },
+                    "encodingFormat": {
+                        "type": "string"
+                    },
+                    "keywords": {
+                        "type": "array"
+                    }
+                }
+            },
+            "itemReviewed": {
+                "allOf": [
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "ArtGallery"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/ArtGallery"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "BarOrPub"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/BarOrPub"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "Book"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/Book"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "ComedyEvent"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/ComedyEvent"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "ExhibitionEvent"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/ExhibitionEvent"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "LandmarksOrHistoricalBuildings"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/LandmarksOrHistoricalBuildings"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "Movie"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/Movie"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "MusicAlbum"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/MusicAlbum"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "MusicEvent"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/MusicEvent"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "MusicRecording"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/MusicRecording"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "MusicRelease"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/MusicRelease"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "MusicVenue"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/MusicVenue"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "NightClub"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/NightClub"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "Restaurant"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/Restaurant"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "ScreeningEvent"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/ScreeningEvent"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "SportsEvent"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/SportsEvent"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "TheaterEvent"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/TheaterEvent"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "TVSeason"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/TVSeason"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
+                                    "const": "TVSeries"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/TVSeries"
+                        }
+                    },
+                    {
+                        "if": {
+                            "not": {
+                                "anyOf": [
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "ArtGallery"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "BarOrPub"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "Book"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "ComedyEvent"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "ExhibitionEvent"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "LandmarksOrHistoricalBuildings"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "Movie"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "MusicAlbum"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "MusicEvent"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "MusicRecording"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "MusicRelease"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "MusicVenue"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "NightClub"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "Restaurant"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "ScreeningEvent"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "SportsEvent"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "TheaterEvent"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "TVSeason"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "TVSeries"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        "then": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/genericEvent"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/genericPlace"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "LandmarksOrHistoricalBuildings": {
+                "allOf": [
+                    {
+                        "$ref": "#/$defs/schema.org/basePlace"
+                    }
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "@type": {
+                        "const": "LandmarksOrHistoricalBuildings"
+                    },
+                    "name": true,
+                    "address": true,
+                    "telephone": true,
+                    "url": true,
+                    "creator": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/Person"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/Organization"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "Movie": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "@type",
+                    "name"
+                ],
+                "properties": {
+                    "@type": {
+                        "const": "Movie"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "director": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/Person"
+                        }
+                    },
+                    "productionCompany": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/Organization"
+                        }
+                    },
+                    "inLanguage": {
+                        "type": "string"
+                    },
+                    "subtitleLanguage": {
+                        "type": "string"
+                    },
+                    "copyrightYear": {
+                        "type": "number"
+                    },
+                    "actor": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/Person"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/Organization"
+                                }
+                            ]
+                        }
+                    },
+                    "musicBy": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/Person"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/Organization"
+                                }
+                            ]
+                        }
+                    },
+                    "sameAs": {
+                        "type": "string",
+                        "description": "imdb url",
+                        "examples": [
+                            "https://www.imdb.com/title/tt0075612"
+                        ]
+                    }
+                }
+            },
+            "MovieTheater": {
+                "allOf": [
+                    {
+                        "$ref": "#/$defs/schema.org/basePlace"
+                    }
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "@type": {
+                        "const": "MovieTheater"
+                    },
+                    "name": true,
+                    "address": true,
+                    "telephone": true,
+                    "url": true,
+                    "event": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/ScreeningEvent"
+                        }
+                    }
+                }
+            },
+            "Museum": {
+                "allOf": [
+                    {
+                        "$ref": "#/$defs/schema.org/basePlace"
+                    }
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "@type": {
+                        "const": "Museum"
+                    },
+                    "name": true,
+                    "address": true,
+                    "telephone": true,
+                    "url": true,
+                    "event": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/ExhibitionEvent"
+                        }
+                    }
+                }
+            },
+            "MusicAlbum": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "@type",
+                    "name"
+                ],
+                "properties": {
+                    "@type": {
+                        "const": "MusicAlbum"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "albumRelease": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/MusicRelease"
+                        }
+                    },
+                    "byArtist": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/Person"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/MusicGroup"
+                                }
+                            ]
+                        }
+                    },
+                    "track": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/MusicRecording"
+                        }
+                    }
+                }
+            },
+            "MusicComposition": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "@type",
+                    "name"
+                ],
+                "properties": {
+                    "@type": {
+                        "const": "MusicComposition"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "composer": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/Person"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/Organization"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "MusicEvent": {
+                "allOf": [
+                    {
+                        "$ref": "#/$defs/schema.org/baseEvent"
+                    }
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "@type": {
+                        "const": "MusicEvent"
+                    },
+                    "name": true,
+                    "eventSchedule": true,
+                    "location": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/MusicVenue"
+                        }
+                    },
+                    "performer": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/Person"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/MusicGroup"
+                                }
+                            ]
+                        }
+                    },
+                    "workPerformed": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/MusicComposition"
+                        }
+                    }
+                }
+            },
+            "MusicGroup": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "@type",
+                    "name"
+                ],
+                "properties": {
+                    "@type": {
+                        "const": "MusicGroup"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                }
+            },
+            "MusicRecording": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "@type",
+                    "name"
+                ],
+                "properties": {
+                    "@type": {
+                        "const": "MusicRecording"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "byArtist": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/Person"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/MusicGroup"
+                                }
+                            ]
+                        }
+                    },
+                    "inAlbum": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/MusicAlbum"
+                        }
+                    },
+                    "release": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/MusicRelease"
+                        }
+                    }
+                }
+            },
+            "MusicRelease": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "@type",
+                    "recordLabel"
+                ],
+                "properties": {
+                    "@type": {
+                        "const": "MusicRelease"
+                    },
+                    "recordLabel": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/Organization"
+                        }
+                    },
+                    "releaseOf": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/MusicAlbum"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/MusicRecording"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "MusicVenue": {
+                "allOf": [
+                    {
+                        "$ref": "#/$defs/schema.org/basePlace"
+                    }
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "@type": {
+                        "const": "MusicVenue"
+                    },
+                    "name": true,
+                    "address": true,
+                    "telephone": true,
+                    "url": true,
+                    "event": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/MusicEvent"
+                        }
+                    }
+                }
+            },
+            "NightClub": {
+                "allOf": [
+                    {
+                        "$ref": "#/$defs/schema.org/basePlace"
+                    }
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "@type": {
+                        "const": "NightClub"
+                    },
+                    "name": true,
+                    "address": true,
+                    "telephone": true,
+                    "url": true,
+                    "event": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/MusicEvent"
+                        }
+                    }
+                }
+            },
+            "Note": {
+                "type": "object",
+                "description": "Supplemental text, often at the start or end of the article, perhaps following a signer. This may be an italicized note, such as a translation credit or additional context like “This is the first part of a two-part Profile.” In the “Goings on About Town” section, this would correspond to italicized details about schedules and locations following an event’s description.",
+                "required": [
+                    "@type",
+                    "additionalType",
+                    "text"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "@type": {
+                        "const": "CreativeWork"
+                    },
+                    "additionalType": {
+                        "const": "Note"
+                    },
+                    "text": {
+                        "type": "string"
+                    }
+                }
+            },
+            "Organization": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "@type",
+                    "name"
+                ],
+                "properties": {
+                    "@type": {
+                        "const": "Organization"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "location": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/anyPlace"
+                        }
+                    }
+                }
+            },
+            "PerformingArtsTheater": {
+                "allOf": [
+                    {
+                        "$ref": "#/$defs/schema.org/basePlace"
+                    }
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "@type": {
+                        "const": "PerformingArtsTheater"
+                    },
+                    "name": true,
+                    "address": true,
+                    "telephone": true,
+                    "url": true,
+                    "event": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/TheaterEvent"
+                        }
+                    }
+                }
+            },
+            "PerformingGroup": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "@type",
+                    "name"
+                ],
+                "properties": {
+                    "@type": {
+                        "const": "PerformingGroup"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                }
+            },
+            "Person": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "@type",
+                    "name"
+                ],
+                "properties": {
+                    "@type": {
+                        "const": "Person"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                }
+            },
+            "Play": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "@type",
+                    "name"
+                ],
+                "properties": {
+                    "@type": {
+                        "const": "Play"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "author": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/Person"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/Organization"
+                                }
+                            ]
+                        }
+                    },
+                    "translator": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/Person"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/Organization"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "PublicationIssue": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "@type",
+                    "issueNumber",
+                    "datePublished",
+                    "isPartOf",
+                    "url"
+                ],
+                "properties": {
+                    "@type": {
+                        "const": "PublicationIssue"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "The name of the issue, as printed on the cover, near the page numbers or on the table of contents.",
+                        "examples": [
+                            "June 7, 1969",
+                            "June 27 & July 4, 1994",
+                            "December 25, 2000 & January 1, 2001",
+                            "August 19 & 26, 2002"
+                        ]
+                    },
+                    "issueNumber": {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    "datePublished": {
+                        "description": "The publish date of the issue.",
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "url": {
+                        "description": "The URL of the issue on newyorker.com.",
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "isPartOf": {
+                        "$ref": "#/$defs/schema.org/PublicationVolume"
+                    }
+                }
+            },
+            "PublicationVolume": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "@type",
+                    "volumeNumber"
+                ],
+                "properties": {
+                    "@type": {
+                        "const": "PublicationVolume"
+                    },
+                    "volumeNumber": {
+                        "type": "integer",
+                        "minimum": 1
+                    }
+                }
+            },
+            "Restaurant": {
+                "allOf": [
+                    {
+                        "$ref": "#/$defs/schema.org/basePlace"
+                    }
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "@type": {
+                        "const": "Restaurant"
+                    },
+                    "name": true,
+                    "address": true,
+                    "telephone": true,
+                    "url": true,
+                    "event": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/MusicEvent"
+                        }
+                    }
+                }
+            },
+            "Schedule": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "@type",
+                    "description"
+                ],
+                "properties": {
+                    "@type": {
+                        "const": "Schedule"
+                    },
+                    "description": {
+                        "type": "string"
+                    }
+                }
+            },
+            "ScreeningEvent": {
+                "allOf": [
+                    {
+                        "$ref": "#/$defs/schema.org/baseEvent"
+                    }
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "@type": {
+                        "const": "ScreeningEvent"
+                    },
+                    "name": true,
+                    "eventSchedule": true,
+                    "location": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/MovieTheater"
+                        }
+                    },
+                    "workPresented": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/Movie"
+                        }
+                    }
+                }
+            },
+            "SportsEvent": {
+                "allOf": [
+                    {
+                        "$ref": "#/$defs/schema.org/baseEvent"
+                    }
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "@type": {
+                        "const": "SportsEvent"
+                    },
+                    "name": true,
+                    "location": true,
+                    "eventSchedule": true,
+                    "sport": {
+                        "type": "text"
+                    },
+                    "competitor": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/Person"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/Organization"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "TheaterEvent": {
+                "allOf": [
+                    {
+                        "$ref": "#/$defs/schema.org/baseEvent"
+                    }
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "@type": {
+                        "const": "TheaterEvent"
+                    },
+                    "name": true,
+                    "eventSchedule": true,
+                    "location": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/PerformingArtsTheater"
+                        }
+                    },
+                    "actor": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/Person"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/PerformingGroup"
+                                }
+                            ]
+                        }
+                    },
+                    "director": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/Person"
+                        }
+                    },
+                    "workPerformed": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/Play"
+                        }
+                    },
+                    "sameAs": {
+                        "type": "string",
+                        "description": "IBDB or IOBDB url",
+                        "examples": [
+                            "http://www.iobdb.com/Production/3307",
+                            "https://www.ibdb.com/broadway-production/the-front-page-3298"
+                        ]
+                    }
+                }
+            },
+            "TVSeason": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "@type",
+                    "seasonNumber"
+                ],
+                "properties": {
+                    "@type": {
+                        "const": "TVSeason"
+                    },
+                    "seasonNumber": {
+                        "type": "number"
+                    },
+                    "productionCompany": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "$ref": "#/$defs/schema.org/Organization"
+                        }
+                    },
+                    "inLanguage": {
+                        "type": "string"
+                    },
+                    "subtitleLanguage": {
+                        "type": "string"
+                    },
+                    "copyrightYear": {
+                        "type": "number"
+                    },
+                    "actor": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/Person"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/Organization"
+                                }
+                            ]
+                        }
+                    },
+                    "musicBy": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/Person"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/Organization"
+                                }
+                            ]
+                        }
+                    },
+                    "sameAs": {
+                        "type": "string",
+                        "description": "imdb url",
+                        "examples": [
+                            "https://www.imdb.com/title/tt0075612"
+                        ]
+                    },
+                    "partOfSeries": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/TVSeries"
+                        }
+                    },
+                    "episode": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/Episode"
+                        }
+                    }
+                }
+            },
+            "TVSeries": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "@type",
+                    "name"
+                ],
+                "properties": {
+                    "@type": {
+                        "const": "TVSeries"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "creator": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/Person"
+                        }
+                    },
+                    "productionCompany": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/Organization"
+                        }
+                    },
+                    "inLanguage": {
+                        "type": "string"
+                    },
+                    "subtitleLanguage": {
+                        "type": "string"
+                    },
+                    "copyrightYear": {
+                        "type": "number"
+                    },
+                    "actor": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/Person"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/Organization"
+                                }
+                            ]
+                        }
+                    },
+                    "musicBy": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/$defs/schema.org/Person"
+                                },
+                                {
+                                    "$ref": "#/$defs/schema.org/Organization"
+                                }
+                            ]
+                        }
+                    },
+                    "sameAs": {
+                        "type": "string",
+                        "description": "imdb url",
+                        "examples": [
+                            "https://www.imdb.com/title/tt0075612"
+                        ]
+                    },
+                    "containsSeason": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/schema.org/TVSeason"
                         }
                     }
                 }
