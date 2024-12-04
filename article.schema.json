@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/CondeNast/tny-archive-schemas/v1.3.1/article.schema.json",
+    "$id": "https://raw.githubusercontent.com/CondeNast/tny-archive-schemas/v1.3.2/article.schema.json",
     "title": "Article",
     "description": "A New Yorker article.",
     "type": "object",
@@ -1111,7 +1111,9 @@
                     "@type": {
                         "const": "Episode"
                     },
-                    "episodeNumber": "number",
+                    "episodeNumber": {
+                        "type": "number"
+                    },
                     "name": {
                         "type": "string"
                     },
@@ -2494,7 +2496,7 @@
                     "location": true,
                     "eventSchedule": true,
                     "sport": {
-                        "type": "text"
+                        "type": "string"
                     },
                     "competitor": {
                         "type": "array",
