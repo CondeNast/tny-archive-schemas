@@ -14,14 +14,14 @@
 If using nvm:
 ```bash
 nvm use
-\```
+```
 
 ```bash
 npm install
-\```
+```
 
 ```bash
-npm run validate -- /PATH/TO/FOLDER
+npm run validate /PATH/TO/FOLDER
 ```
 
 or
