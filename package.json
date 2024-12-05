@@ -1,0 +1,22 @@
+{
+  "name": "tny-archive-schemas",
+  "description": "",
+  "keywords": [],
+  "license": "ISC",
+  "author": "",
+  "scripts": {
+    "validate": "node validate.js"
+  },
+  "dependencies": {
+    "@cfworker/json-schema": "3.0.1"
+  },
+  "devDependencies": {
+    "prettier": "3.4.2"
+  },
+  "engines": {
+    "node": "22.x",
+    "npm": "10.x"
+  },
+  "private": true,
+  "type": "module"
+}
