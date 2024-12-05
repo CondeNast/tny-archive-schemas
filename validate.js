@@ -36,7 +36,7 @@ function pwd() {
 
   if (!input) {
     console.error(
-      'One positional argument is required (a path to a directory or file).'
+      'One positional argument is required (a path to a directory or file).',
     );
     process.exit(1);
   }

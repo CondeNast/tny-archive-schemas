@@ -5,12 +5,15 @@
   "license": "ISC",
   "author": "",
   "scripts": {
-    "validate": "node validate.js"
+    "validate": "node validate.js",
+    "prepare": "husky"
   },
   "dependencies": {
     "@cfworker/json-schema": "3.0.1"
   },
   "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10",
     "prettier": "3.4.2"
   },
   "engines": {
@@ -18,5 +21,8 @@
     "npm": "10.x"
   },
   "private": true,
-  "type": "module"
+  "type": "module",
+  "lint-staged": {
+    "*.{js,json}": "prettier --write"
+  }
 }
