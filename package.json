@@ -7,8 +7,17 @@
   "scripts": {
     "validate": "node validate.js"
   },
+  "imports": {
+    "#article.raw.schema.xsd": "./article.raw.schema.xsd",
+    "#article.schema.json": "./article.schema.json",
+    "#reports/*": "./reports/*"
+  },
   "dependencies": {
-    "@cfworker/json-schema": "3.0.1"
+    "@cfworker/json-schema": "3.0.1",
+    "chalk": "^5.4.0",
+    "fast-xml-parser": "^4.5.1",
+    "papaparse": "^5.4.1",
+    "xsd-validator": "^1.1.1"
   },
   "devDependencies": {
     "prettier": "3.4.2"
