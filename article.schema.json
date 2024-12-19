@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/CondeNast/tny-archive-schemas/v1.3.2/article.schema.json",
+    "$id": "https://raw.githubusercontent.com/CondeNast/tny-archive-schemas/v1.3.3/article.schema.json",
     "title": "Article",
     "description": "A New Yorker article.",
     "type": "object",
@@ -478,6 +478,21 @@
                         "if": {
                             "properties": {
                                 "@type": {
+                                    "const": "BroadcastEvent"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/BroadcastEvent"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
                                     "const": "ComedyEvent"
                                 }
                             },
@@ -583,6 +598,16 @@
                         "if": {
                             "not": {
                                 "anyOf": [
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "BroadcastEvent"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
                                     {
                                         "properties": {
                                             "@type": {
@@ -1378,6 +1403,21 @@
                         "if": {
                             "properties": {
                                 "@type": {
+                                    "const": "BroadcastEvent"
+                                }
+                            },
+                            "required": [
+                                "@type"
+                            ]
+                        },
+                        "then": {
+                            "$ref": "#/$defs/schema.org/BroadcastEvent"
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "@type": {
                                     "const": "ComedyEvent"
                                 }
                             },
@@ -1642,6 +1682,16 @@
                                         "properties": {
                                             "@type": {
                                                 "const": "Book"
+                                            }
+                                        },
+                                        "required": [
+                                            "@type"
+                                        ]
+                                    },
+                                    {
+                                        "properties": {
+                                            "@type": {
+                                                "const": "BroadcastEvent"
                                             }
                                         },
                                         "required": [
