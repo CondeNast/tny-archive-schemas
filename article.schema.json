@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/CondeNast/tny-archive-schemas/v1.3.3/article.schema.json",
+    "$id": "https://raw.githubusercontent.com/CondeNast/tny-archive-schemas/v1.4.0/article.schema.json",
     "title": "Article",
     "description": "A New Yorker article.",
     "type": "object",
@@ -1311,7 +1311,7 @@
                     "@type",
                     "additionalType"
                 ],
-                "additionalProperties": false,
+                "unevaluatedProperties": false,
                 "properties": {
                     "@type": {
                         "const": "ImageObject"
@@ -1324,7 +1324,8 @@
                             "Illustration",
                             "Other",
                             "Photograph",
-                            "Spot"
+                            "Spot",
+                            "TextArt"
                         ]
                     },
                     "contentUrl": {
@@ -1349,6 +1350,25 @@
                     },
                     "keywords": {
                         "type": "array"
+                    }
+                },
+                "if": {
+                    "type": "object",
+                    "properties": {
+                        "additionalType": {
+                            "const": "TextArt"
+                        }
+                    },
+                    "required": [
+                        "additionalType"
+                    ]
+                },
+                "then": {
+                    "properties": {
+                        "embeddedTextCaption": {
+                            "description": "Text contained within the image.",
+                            "type": "string"
+                        }
                     }
                 }
             },

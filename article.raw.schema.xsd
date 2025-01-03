@@ -102,6 +102,7 @@
       <xs:enumeration value="other"/>
       <xs:enumeration value="photograph"/>
       <xs:enumeration value="spot"/>
+      <xs:enumeration value="text-art"/>
     </xs:restriction>
   </xs:simpleType>
 
