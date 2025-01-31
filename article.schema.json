@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/CondeNast/tny-archive-schemas/v1.4.0/article.schema.json",
+    "$id": "https://metamorph.newyorker.tools/schemas/v1.6.0/article.schema.json",
     "title": "Article",
     "description": "A New Yorker article.",
     "type": "object",
@@ -249,7 +249,7 @@
         },
         "schemaUrl": {
             "type": "string",
-            "pattern": "https://raw\\.githubusercontent\\.com/CondeNast/tny-archive-schemas/v1\\.\\d+\\.\\d+/article\\.schema\\.json"
+            "pattern": "https://(metamorph\\.newyorker\\.tools/schemas|raw\\.githubusercontent\\.com/CondeNast/tny-archive-schemas)/v1\\.\\d+\\.\\d+/article\\.schema\\.json"
         },
         "uuidv4": {
             "description": "A V4 UUID.",
