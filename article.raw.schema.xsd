@@ -6,7 +6,7 @@
   <!-- BASE TYPES -->
   <xs:simpleType name="schema_url_type">
     <xs:restriction base="xs:string">
-      <xs:pattern value="https://raw\.githubusercontent\.com/CondeNast/tny-archive-schemas/v1\.\d+\.\d+/article\.raw\.schema\.xsd"/>
+      <xs:pattern value="https://(metamorph\.newyorker\.tools/schemas|raw\.githubusercontent\.com/CondeNast/tny-archive-schemas)/v1\.\d+\.\d+/article\.raw\.schema\.xsd"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -162,6 +162,7 @@
       <xs:enumeration value="note"/>
       <xs:enumeration value="descender"/>
       <xs:enumeration value="chapter-heading"/>
+      <xs:enumeration value="no-indent"/>
     </xs:restriction>
   </xs:simpleType>
 
